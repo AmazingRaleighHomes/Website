@@ -1,13 +1,45 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaChevronLeft, FaChevronRight, FaBed, FaBath, FaCar, FaRulerCombined, FaMapMarkerAlt, FaShareAlt, FaDownload } from "react-icons/fa";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import dynamic from "next/dynamic";
+
+// Dynamically import Leaflet map component to prevent SSR errors
+const MapContainer = dynamic(
+  () => import("react-leaflet").then(mod => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then(mod => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then(mod => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(
+  () => import("react-leaflet").then(mod => mod.Popup),
+  { ssr: false }
+);
+
+// Fix Leaflet default icon in Next.js
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+});
 
 export default function ListingModal({ property, isOpen, onClose }) {
   const [currentImage, setCurrentImage] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true); // ensures client-only rendering
+  }, []);
 
   if (!property || !isOpen) return null;
 
@@ -101,7 +133,7 @@ export default function ListingModal({ property, isOpen, onClose }) {
             {property.Description && <p className="text-gray-600 mt-2">{property.Description}</p>}
 
             {/* Map */}
-            {property.Latitude && property.Longitude && (
+            {isClient && property.Latitude && property.Longitude && (
               <div className="w-full h-64 mt-4 rounded-lg overflow-hidden">
                 <MapContainer center={[property.Latitude, property.Longitude]} zoom={15} scrollWheelZoom={false} className="w-full h-full">
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
