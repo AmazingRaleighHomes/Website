@@ -1,41 +1,51 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-// Mock MLS data
-const allProperties = Array.from({ length: 24 }, (_, i) => ({
-  id: i + 1,
-  image:
-    "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
-  price: `$${350 + i * 10}k`,
-  type: ["Apartments", "Duplex Homes", "Town Houses", "Studio Apartments"][i % 4],
-  location: ["Raleigh, NC", "Durham, NC", "Chapel Hill, NC"][i % 3],
-}));
-
 export default function MLSProperties() {
+  const [properties, setProperties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedType, setSelectedType] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const perPage = 12;
-  const maxPage = Math.ceil(allProperties.length / perPage);
 
-  const propertyTypes = [
-    "All",
-    "Apartments",
-    "Duplex Homes",
-    "Town Houses",
-    "Studio Apartments",
-  ];
+  useEffect(() => {
+    async function fetchMLS() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/mls");
+        const data = await res.json();
 
+        if (data.error) {
+          setError(data.error);
+        } else {
+          // Spark RESO Web API v3 returns listings as an array
+          setProperties(data || []);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMLS();
+  }, []);
+
+  const propertyTypes = ["All", "Single Family", "Townhouse", "Condo", "Apartment"];
   const filtered =
     selectedType === "All"
-      ? allProperties
-      : allProperties.filter((p) => p.type === selectedType);
+      ? properties
+      : properties.filter((p) => p.PropertySubType === selectedType);
 
   const displayedProperties = filtered.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
   );
+
+  const maxPage = Math.ceil(filtered.length / perPage);
 
   return (
     <section className="py-20 bg-gray-50">
@@ -72,7 +82,7 @@ export default function MLSProperties() {
               }}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all border ${
                 selectedType === type
-                  ? "bg-[#ebcc65] text-white border-gray-500]"
+                  ? "bg-[#ebcc65] text-white border-gray-500"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
               }`}
             >
@@ -81,35 +91,55 @@ export default function MLSProperties() {
           ))}
         </div>
 
+        {/* Loading/Error State */}
+        {loading && <p className="text-gray-500">Loading MLS listings...</p>}
+        {error && <p className="text-red-500">Error: {error}</p>}
+
         {/* Properties Grid */}
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {displayedProperties.map((property) => (
-            <motion.div
-              key={property.id}
-              whileHover={{ scale: 1.03 }}
-              className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition"
-            >
-              <img
-                src={property.image}
-                alt={property.type}
-                className="w-full h-56 object-cover"
-              />
-              <div className="p-4">
-                <p className="text-lg font-semibold text-[#d7595d]">
-                  {property.price}
-                </p>
-                <p className="text-gray-700">{property.type}</p>
-                <p className="text-gray-500 text-sm">{property.location}</p>
-                <button className="mt-4 w-full bg-[#ebcc65] hover:bg-[#d7595d] text-white py-2 rounded-full transition">
-                  View Details
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {!loading && !error && (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {displayedProperties.map((property) => (
+              <motion.div
+                key={property.ListingKey || property.Id}
+                whileHover={{ scale: 1.03 }}
+                className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition"
+              >
+                {/* Image */}
+                <img
+                  src={
+                    property?.Media?.[0]?.MediaURL || // first media from Spark
+                    "/images/no-image.jpg" // fallback local image
+                  }
+                  alt={property?.UnparsedAddress || "Property image"}
+                  className="w-full h-56 object-cover"
+                />
+
+                {/* Details */}
+                <div className="p-4">
+                  <p className="text-lg font-semibold text-[#d7595d]">
+                    $
+                    {property?.ListPrice
+                      ? property.ListPrice.toLocaleString()
+                      : "N/A"}
+                  </p>
+                  <p className="text-gray-700">
+                    {property?.PropertySubType || property?.PropertyType || "Home"}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    {property?.UnparsedAddress || "Address unavailable"}
+                  </p>
+
+                  <button className="mt-4 w-full bg-[#ebcc65] hover:bg-[#d7595d] text-white py-2 rounded-full transition">
+                    View Details
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination / Load More */}
-        {filtered.length > perPage && (
+        {!loading && !error && filtered.length > perPage && (
           <div className="mt-12 text-center">
             <button
               onClick={() =>
