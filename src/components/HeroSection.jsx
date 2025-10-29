@@ -3,24 +3,67 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function HeroSection({ selectedArea }) {
-  const [activeTab, setActiveTab] = useState("buy");
-  const [tabOpen, setTabOpen] = useState(false);
+export default function HeroSection({ selectedArea, onSearch }) {
   const [propertyOpen, setPropertyOpen] = useState(false);
-  const [propertyValue, setPropertyValue] = useState("Property Value");
+  const [propertyValue, setPropertyValue] = useState("Any Price");
+  const [query, setQuery] = useState("");
 
-  const tabRef = useRef(null);
   const propertyRef = useRef(null);
-  const [tabWidth, setTabWidth] = useState(0);
   const [propertyWidth, setPropertyWidth] = useState(0);
 
-  const propertyOptions = ["$100k", "$300k", "$500k", "$750k+"];
+  const propertyOptions = ["Any Price", "$100k", "$300k", "$500k", "$750k+"];
 
-  // Measure widths dynamically
+  // Measure property dropdown width
   useEffect(() => {
-    if (tabRef.current) setTabWidth(tabRef.current.offsetWidth);
     if (propertyRef.current) setPropertyWidth(propertyRef.current.offsetWidth);
   }, []);
+
+  // Smooth exponential scroll to MLS component
+  const scrollToMLS = () => {
+    const target = document.getElementById("mls-listings");
+    if (!target) return;
+
+    const start = window.scrollY;
+    const end = target.offsetTop;
+    const distance = end - start;
+    const duration = 800; // in ms
+    let startTime = null;
+
+    const easeInOutExpo = (t) =>
+      t === 0
+        ? 0
+        : t === 1
+        ? 1
+        : t < 0.5
+        ? Math.pow(2, 20 * t - 10) / 2
+        : (2 - Math.pow(2, -20 * t + 10)) / 2;
+
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+      const eased = easeInOutExpo(progress);
+
+      window.scrollTo(0, start + distance * eased);
+
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  };
+
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch({
+        price: propertyValue,
+        query: query,
+        area: selectedArea,
+      });
+    }
+    scrollToMLS(); // scroll after applying filters
+  };
 
   return (
     <section
@@ -33,7 +76,6 @@ export default function HeroSection({ selectedArea }) {
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/40" />
 
-      {/* Animated Content */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
@@ -54,61 +96,13 @@ export default function HeroSection({ selectedArea }) {
           with trusted local real estate experts.
         </motion.p>
 
-        {/* Minimalistic Pill Search Bar */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
           className="bg-white/90 backdrop-blur-xl rounded-full w-full max-w-4xl mx-auto flex items-center text-gray-700 font-medium divide-x divide-gray-300 px-4 py-2 relative"
         >
-          {/* Buy / Rent */}
-          <div
-            ref={tabRef}
-            className="relative flex items-center gap-1 px-3 cursor-pointer"
-            onClick={() => setTabOpen(!tabOpen)}
-          >
-            <span>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
-            <svg
-              className="w-4 h-4 text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-
-            <AnimatePresence>
-              {tabOpen && (
-                <motion.ul
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20"
-                  style={{ width: tabWidth }}
-                >
-                  {["buy", "rent"].map((tab) => (
-                    <li
-                      key={tab}
-                      onClick={() => {
-                        setActiveTab(tab);
-                        setTabOpen(false);
-                      }}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Property Value */}
+          {/* Property Value Dropdown */}
           <div
             ref={propertyRef}
             className="relative flex items-center gap-1 px-3 cursor-pointer"
@@ -162,11 +156,16 @@ export default function HeroSection({ selectedArea }) {
           <input
             type="text"
             placeholder="City, Address, or MLS #"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="flex-grow bg-transparent px-3 py-1 focus:outline-none placeholder-gray-500"
           />
 
           {/* Search Button */}
-          <button className="bg-[#ebcc65] border hover:bg-[#e5555c] text-white px-6 py-2 rounded-full font-medium transition">
+          <button
+            onClick={handleSearch}
+            className="bg-[#ebcc65] border hover:bg-[#e5555c] text-white px-6 py-2 rounded-full font-medium transition"
+          >
             Search
           </button>
         </motion.div>
