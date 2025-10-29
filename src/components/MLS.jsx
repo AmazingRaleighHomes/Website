@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import ListingModal from "./ListingModal"; // import the modal component
 
 export default function MLSProperties({ filters = {} }) {
   const [properties, setProperties] = useState([]);
@@ -9,6 +10,7 @@ export default function MLSProperties({ filters = {} }) {
   const [selectedType, setSelectedType] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null); // modal state
 
   const perPage = 12;
 
@@ -23,7 +25,6 @@ export default function MLSProperties({ filters = {} }) {
         if (data.error) {
           setError(data.error);
         } else {
-          // Spark RESO Web API v3 returns listings as an array
           setProperties(data || []);
         }
       } catch (err) {
@@ -128,6 +129,7 @@ export default function MLSProperties({ filters = {} }) {
                 key={property.ListingKey || property.Id}
                 whileHover={{ scale: 1.03 }}
                 className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition"
+                onClick={() => setSelectedProperty(property)} // open modal
               >
                 {/* Image */}
                 <img
@@ -169,6 +171,13 @@ export default function MLSProperties({ filters = {} }) {
             </button>
           </div>
         )}
+
+      <ListingModal
+  property={selectedProperty}
+  isOpen={!!selectedProperty} // <- this fixes it
+  onClose={() => setSelectedProperty(null)}
+/>
+
       </div>
     </section>
   );
