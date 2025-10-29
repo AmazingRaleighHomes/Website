@@ -2,40 +2,43 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { FaChevronLeft, FaChevronRight, FaBed, FaBath, FaCar, FaRulerCombined, FaMapMarkerAlt, FaShareAlt, FaDownload } from "react-icons/fa";
+import { 
+  FaChevronLeft, FaChevronRight, FaBed, FaBath, FaCar, 
+  FaRulerCombined, FaMapMarkerAlt, FaShareAlt, FaDownload 
+} from "react-icons/fa";
 import dynamic from "next/dynamic";
 
-// Dynamically import Leaflet map component to prevent SSR errors
-const MapContainer = dynamic(
-  () => import("react-leaflet").then(mod => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then(mod => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then(mod => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import("react-leaflet").then(mod => mod.Popup),
-  { ssr: false }
-);
+// Dynamically import Leaflet components to prevent SSR errors
+const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), { ssr: false });
 
-// Fix Leaflet default icon in Next.js
+// Fix Leaflet default icon
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+// Example: custom marker icon
+const customMarker = new L.Icon({
+  iconUrl: "/images/custom-marker.png", // path to your custom icon
+  iconRetinaUrl: "/images/custom-marker@2x.png", // optional retina version
+  iconSize: [45, 45], // size of the icon [width, height]
+  iconAnchor: [17, 45], // point of the icon which will correspond to marker's location
+  popupAnchor: [0, -40], // where the popup opens relative to iconAnchor
+  shadowUrl: "/images/marker-shadow.png", // optional shadow
+  shadowSize: [45, 45],
+  shadowAnchor: [17, 45],
 });
 
 export default function ListingModal({ property, isOpen, onClose }) {
   const [currentImage, setCurrentImage] = useState(0);
   const [isClient, setIsClient] = useState(false);
+
+  // Log the property object for debugging field names
+  useEffect(() => {
+    if (property) {
+      console.log("ListingModal property object:", property);
+    }
+  }, [property]);
 
   useEffect(() => {
     setIsClient(true); // ensures client-only rendering
@@ -48,10 +51,11 @@ export default function ListingModal({ property, isOpen, onClose }) {
   const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
   const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
 
+  // Formatters
   const formatPrice = (val) => (val ? `$${val.toLocaleString()}` : "N/A");
   const formatSqft = (val) => (val ? `${val.toLocaleString()} sqft` : "N/A");
-  const formatLot = (val) => (val ? `${val} acres` : "N/A");
 
+  // Badges
   const badges = [];
   if (property.DaysOnMarket && property.DaysOnMarket < 7) badges.push("New Listing");
   if (property.PriceReductionAmount) badges.push("Price Reduced");
@@ -112,14 +116,29 @@ export default function ListingModal({ property, isOpen, onClose }) {
               <p className="text-gray-700">{property.UnparsedAddress || "Address unavailable"}</p>
             </div>
 
-            {/* Features Icons */}
-            <div className="flex flex-wrap gap-4 text-gray-600 text-sm">
-              <div className="flex items-center gap-1"><FaBed /> {property.Bedrooms || "N/A"} Beds</div>
-              <div className="flex items-center gap-1"><FaBath /> {property.Bathrooms || "N/A"} Baths</div>
-              <div className="flex items-center gap-1"><FaCar /> {property.GarageSpaces || "N/A"} Garage</div>
-              <div className="flex items-center gap-1"><FaRulerCombined /> {formatSqft(property.LivingArea)}</div>
-              <div className="flex items-center gap-1"><FaMapMarkerAlt /> {property.SchoolDistrict || "N/A"}</div>
-            </div>
+           {/* Features Icons */}
+<div className="flex flex-wrap gap-4 text-gray-600 text-sm">
+  <div className="flex items-center gap-1">
+    <FaBed /> {property.BedroomsTotal ?? "N/A"} Beds
+  </div>
+  <div className="flex items-center gap-1">
+    <FaBath /> {(property.BathroomsFull ?? 0) + (property.BathroomsHalf ?? 0)} Baths
+  </div>
+  <div className="flex items-center gap-1">
+    <FaCar /> {property.GarageSpaces ?? property.Garage ?? "N/A"} Garage
+  </div>
+  <div className="flex items-center gap-1">
+    <FaRulerCombined /> {formatSqft(property.LivingArea ?? property.LotSizeTotal ?? property.SquareFootage)}
+  </div>
+  {/* Schools */}
+  <div className="flex flex-col gap-0.5">
+    <div className="flex items-center gap-1">
+      <FaMapMarkerAlt /> {property.HighSchool ?? "N/A"}
+    </div>
+  </div>
+</div>
+
+
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mt-2">
@@ -132,17 +151,25 @@ export default function ListingModal({ property, isOpen, onClose }) {
             {/* Description */}
             {property.Description && <p className="text-gray-600 mt-2">{property.Description}</p>}
 
-            {/* Map */}
-            {isClient && property.Latitude && property.Longitude && (
-              <div className="w-full h-64 mt-4 rounded-lg overflow-hidden">
-                <MapContainer center={[property.Latitude, property.Longitude]} zoom={15} scrollWheelZoom={false} className="w-full h-full">
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <Marker position={[property.Latitude, property.Longitude]}>
-                    <Popup>{property.UnparsedAddress}</Popup>
-                  </Marker>
-                </MapContainer>
-              </div>
-            )}
+      {/* Map */}
+{isClient && property.Latitude && property.Longitude && (
+  <div className="w-full h-64 mt-4 rounded-lg overflow-hidden">
+    <MapContainer
+      center={[property.Latitude, property.Longitude]}
+      zoom={15}
+      scrollWheelZoom={false}
+      className="w-full h-full"
+    >
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <Marker
+        position={[property.Latitude, property.Longitude]}
+        icon={customMarker} // <-- custom icon added here
+      >
+        <Popup>{property.UnparsedAddress}</Popup>
+      </Marker>
+    </MapContainer>
+  </div>
+)}
 
             {/* Agent Info */}
             {property.AgentName && (
