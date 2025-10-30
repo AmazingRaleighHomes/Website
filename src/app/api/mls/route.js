@@ -1,7 +1,6 @@
 // app/api/mls/route.js
-
 export async function GET() {
-  const token = process.env.SPARK_ACCESS_TOKEN; // Store your token in .env.local
+  const token = process.env.SPARK_ACCESS_TOKEN; 
   const baseUrl = "https://replication.sparkapi.com/Version/3/Reso/OData/Property";
 
   if (!token) {
@@ -12,14 +11,17 @@ export async function GET() {
   }
 
   try {
-    // Include media with $expand=Media
-    const response = await fetch(`${baseUrl}?$top=50&$expand=Media`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      cache: "no-store", // always fresh data
-    });
+    // Fetch latest 200 properties, ordered by OnMarketDate descending
+    const response = await fetch(
+      `${baseUrl}?$top=200&$expand=Media&$orderby=OnMarketDate desc`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
+    );
 
     const data = await response.json();
 
@@ -30,7 +32,11 @@ export async function GET() {
       );
     }
 
-    // data.value contains the array of listings with Media included
+    // Log first listing keys for debugging
+    if (data.value && data.value.length > 0) {
+      console.log("First listing keys:", Object.keys(data.value[0]));
+    }
+
     return new Response(JSON.stringify(data.value || []), { status: 200 });
   } catch (err) {
     return new Response(
