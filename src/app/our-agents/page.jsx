@@ -9,39 +9,12 @@ import Footer from "@/components/Footer"; // import your footer
 const agentsData = [
   {
     id: 1,
-    name: "John Doe",
-    area: "Raleigh",
+    name: "Michael Ulrich",
+    area: "Raleigh-Durham",
     title: "Senior Agent",
     image: "https://randomuser.me/api/portraits/men/32.jpg",
-    email: "john@example.com",
-    phone: "(555) 123-4567",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    area: "Durham",
-    title: "Listing Specialist",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
-    email: "jane@example.com",
-    phone: "(555) 987-6543",
-  },
-    {
-    id: 1,
-    name: "John Doe",
-    area: "Raleigh",
-    title: "Senior Agent",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    email: "john@example.com",
-    phone: "(555) 123-4567",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    area: "Durham",
-    title: "Listing Specialist",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
-    email: "jane@example.com",
-    phone: "(555) 987-6543",
+    email: "mike@amazingraleighdurhamhomes.com",
+    phone: "(919) 802-7282",
   },
 ];
 
