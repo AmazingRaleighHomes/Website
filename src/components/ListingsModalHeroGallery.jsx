@@ -1,31 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
 
 export default function ListingsModalHeroGallery({ images = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const startX = useRef(0);
 
-  const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  const handleNext = () => setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  const handlePrev = () =>
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  const handleNext = () =>
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+
   const openGallery = () => setIsGalleryOpen(true);
   const closeGallery = () => setIsGalleryOpen(false);
 
-  if (images.length === 0) return <div className="w-full h-[600px] bg-gray-200" />;
+  if (images.length === 0)
+    return <div className="w-full h-[300px] sm:h-[600px] bg-gray-200" />;
 
-  // Left image
+  // Primary image
   const leftImage = images[0];
-
-  // Right images: take up to 4
+  // Next up to 4 images
   const rightImages = images.slice(1, 5);
+
+  // Swipe handling for mobile fullscreen
+  const handleTouchStart = (e) => (startX.current = e.touches[0].clientX);
+  const handleTouchEnd = (e) => {
+    const diff = startX.current - e.changedTouches[0].clientX;
+    if (diff > 50) handleNext(); // Swipe left
+    if (diff < -50) handlePrev(); // Swipe right
+  };
 
   return (
     <>
-      <div className="w-full h-[600px] flex gap-2 relative overflow-hidden rounded-t-2xl">
-        {/* LEFT HALF */}
+      {/* GALLERY PREVIEW */}
+      <div className="w-full h-[300px] sm:h-[600px] flex flex-col sm:flex-row gap-2 relative overflow-hidden rounded-t-2xl">
+        {/* LEFT MAIN IMAGE */}
         {leftImage && (
-          <div className="w-1/2 h-full relative">
+          <div className="w-full sm:w-1/2 h-[200px] sm:h-full relative">
             <img
               src={leftImage.MediaURL}
               alt="Primary"
@@ -34,23 +47,35 @@ export default function ListingsModalHeroGallery({ images = [] }) {
           </div>
         )}
 
-        {/* RIGHT HALF: 2x2 grid */}
-        <div className="w-1/2 h-full grid grid-cols-2 grid-rows-2 gap-2">
+        {/* RIGHT SIDE GRID (only visible on desktop) */}
+        <div className="hidden sm:grid sm:w-1/2 sm:h-full grid-cols-2 grid-rows-2 gap-2">
           {rightImages.map((img, idx) => (
             <div key={idx} className="w-full h-full relative">
               <img
                 src={img.MediaURL}
-                alt={`Right Image ${idx + 1}`}
+                alt={`Gallery ${idx + 1}`}
                 className="w-full h-full object-cover"
               />
             </div>
           ))}
         </div>
 
-        {/* View All Photos button */}
+        {/* MOBILE STRIP of extra images */}
+        <div className="flex sm:hidden w-full gap-2 overflow-x-auto px-2 mt-2 scrollbar-hide">
+          {rightImages.map((img, idx) => (
+            <img
+              key={idx}
+              src={img.MediaURL}
+              alt={`Gallery thumb ${idx + 1}`}
+              className="h-24 w-36 object-cover rounded-md flex-shrink-0"
+            />
+          ))}
+        </div>
+
+        {/* VIEW BUTTON */}
         <button
           onClick={openGallery}
-          className="absolute right-4 bottom-12 bg-[#d7595d] text-white px-4 py-2 rounded-full hover:bg-[#ebcc65] transition-colors z-10"
+          className="absolute right-4 bottom-4 bg-[#ebcc65] text-black font-medium px-4 py-2 rounded-full shadow hover:opacity-90 transition z-10 text-sm sm:text-base"
         >
           View All Photos
         </button>
@@ -58,36 +83,47 @@ export default function ListingsModalHeroGallery({ images = [] }) {
 
       {/* FULLSCREEN GALLERY MODAL */}
       {isGalleryOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2 sm:p-4"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Close */}
           <button
             onClick={closeGallery}
-            className="absolute top-4 right-4 text-white text-2xl z-10"
+            className="absolute top-4 right-4 text-white text-2xl sm:text-3xl z-10 bg-black/40 p-2 rounded-full hover:bg-black/60"
           >
             <FaTimes />
           </button>
 
-          <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
+          {/* Image container */}
+          <div className="relative w-full max-w-5xl h-[90vh] flex items-center justify-center">
+            {/* Prev */}
             <button
               onClick={handlePrev}
-              className="absolute left-2 text-white text-3xl bg-black/30 p-2 rounded-full hover:bg-black/50 z-10"
+              className="absolute left-3 sm:left-6 text-white text-2xl sm:text-3xl bg-black/30 p-3 sm:p-4 rounded-full hover:bg-black/50 z-10 active:scale-95 transition"
             >
               <FaChevronLeft />
             </button>
 
+            {/* Image */}
             <img
               src={images[currentIndex].MediaURL}
-              alt={`Gallery Image ${currentIndex + 1}`}
-              className="max-h-full max-w-full object-contain"
+              alt={`Gallery ${currentIndex + 1}`}
+              className="max-h-full max-w-full object-contain select-none"
+              draggable="false"
             />
 
+            {/* Next */}
             <button
               onClick={handleNext}
-              className="absolute right-2 text-white text-3xl bg-black/30 p-2 rounded-full hover:bg-black/50 z-10"
+              className="absolute right-3 sm:right-6 text-white text-2xl sm:text-3xl bg-black/30 p-3 sm:p-4 rounded-full hover:bg-black/50 z-10 active:scale-95 transition"
             >
               <FaChevronRight />
             </button>
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/40 px-3 py-1 rounded-full text-sm z-10">
+            {/* Counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/40 px-3 py-1 rounded-full text-xs sm:text-sm z-10">
               {currentIndex + 1} / {images.length}
             </div>
           </div>
