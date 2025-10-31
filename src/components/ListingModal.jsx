@@ -1,196 +1,161 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
-import { 
-  FaChevronLeft, FaChevronRight, FaBed, FaBath, FaCar, 
-  FaRulerCombined, FaMapMarkerAlt, FaShareAlt, FaDownload 
-} from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaShareAlt } from "react-icons/fa";
 import dynamic from "next/dynamic";
+import ListingsModalHeader from "./ListingsModalHeader";
+import ListingsModalPropertySummary from "./ListingsModalPropertySummary";
+import ListingsModalDetailsAccordion from "./ListingsModalDetailsAccordion";
+import "leaflet/dist/leaflet.css";
+import ListingsModalHeroGallery from "./ListingsModalHeroGallery";
 
-// Dynamically import Leaflet components to prevent SSR errors
+// Dynamically import react-leaflet components (SSR-safe)
 const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), { ssr: false });
 
-// Fix Leaflet default icon
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-// Example: custom marker icon
-const customMarker = new L.Icon({
-  iconUrl: "/images/custom-marker.png", // path to your custom icon
-  iconRetinaUrl: "/images/custom-marker@2x.png", // optional retina version
-  iconSize: [45, 45], // size of the icon [width, height]
-  iconAnchor: [17, 45], // point of the icon which will correspond to marker's location
-  popupAnchor: [0, -40], // where the popup opens relative to iconAnchor
-  shadowUrl: "/images/marker-shadow.png", // optional shadow
-  shadowSize: [45, 45],
-  shadowAnchor: [17, 45],
-});
+// Custom Marker Icon (client-only)
+let customMarker;
+if (typeof window !== "undefined") {
+  const L = require("leaflet");
+  customMarker = new L.Icon({
+    iconUrl: "/images/custom-marker.png",
+    iconRetinaUrl: "/images/custom-marker@2x.png",
+    iconSize: [45, 45],
+    iconAnchor: [17, 45],
+    popupAnchor: [0, -40],
+    shadowUrl: "/images/marker-shadow.png",
+    shadowSize: [45, 45],
+    shadowAnchor: [17, 45],
+  });
+}
 
-export default function ListingModal({ property, isOpen, onClose }) {
-  const [currentImage, setCurrentImage] = useState(0);
+export default function ListingsModal({ property, isOpen, onClose }) {
   const [isClient, setIsClient] = useState(false);
 
-  // Log the property object for debugging field names
-  useEffect(() => {
-    if (property) {
-      console.log("ListingModal property object:", property);
-    }
-  }, [property]);
+  useEffect(() => setIsClient(true), []);
+  if (!property || !isOpen || !isClient) return null;
 
-  useEffect(() => {
-    setIsClient(true); // ensures client-only rendering
-  }, []);
+  // Map Component
+  const ListingsModalMap = ({ lat, lng }) => {
+    const mapRef = useRef(null);
 
-  if (!property || !isOpen) return null;
+    useEffect(() => {
+      const resizeMap = () => {
+        if (mapRef.current) {
+          mapRef.current.invalidateSize(false);
+          mapRef.current.panTo([lat, lng]);
+        }
+      };
+      const timers = [setTimeout(resizeMap, 200), setTimeout(resizeMap, 600), setTimeout(resizeMap, 1200)];
+      return () => timers.forEach(clearTimeout);
+    }, [lat, lng]);
 
-  const images = property.Media?.length > 0 ? property.Media : [{ MediaURL: "/images/no-image.jpg" }];
+    return (
+      <div className="relative w-full h-72 mt-4 rounded-lg overflow-hidden shadow-sm z-0">
+        <MapContainer
+          center={[lat, lng]}
+          zoom={15}
+          scrollWheelZoom={false}
+          whenCreated={(mapInstance) => (mapRef.current = mapInstance)}
+          className="w-full h-full"
+          style={{ width: "100%", height: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; CARTO'
+          />
+          <Marker position={[lat, lng]} icon={customMarker}>
+            <Popup>📍 {property?.UnparsedAddress}</Popup>
+          </Marker>
+        </MapContainer>
+        <style jsx>{`
+          .leaflet-container {
+            filter: hue-rotate(195deg) saturate(1.2) brightness(1.05);
+          }
+        `}</style>
+      </div>
+    );
+  };
 
-  const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
-  const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
-
-  // Formatters
-  const formatPrice = (val) => (val ? `$${val.toLocaleString()}` : "N/A");
-  const formatSqft = (val) => (val ? `${val.toLocaleString()} sqft` : "N/A");
-
-  // Badges
-  const badges = [];
-  if (property.DaysOnMarket && property.DaysOnMarket < 7) badges.push("New Listing");
-  if (property.PriceReductionAmount) badges.push("Price Reduced");
+  // Contact Form
+  const ListingsModalContactForm = ({ propertyId }) => (
+    <div className="space-y-3 mt-4">
+      <h3 className="text-lg font-semibold">Request a Tour</h3>
+      <form className="space-y-2">
+        <input type="text" placeholder="First Name" className="w-full border border-gray-300 rounded-lg p-2" />
+        <input type="text" placeholder="Last Name" className="w-full border border-gray-300 rounded-lg p-2" />
+        <input type="email" placeholder="Email" className="w-full border border-gray-300 rounded-lg p-2" />
+        <input type="tel" placeholder="Phone" className="w-full border border-gray-300 rounded-lg p-2" />
+        <textarea placeholder="Message" className="w-full border border-gray-300 rounded-lg p-2" rows={3}></textarea>
+        <button type="submit" className="w-full bg-[#d7595d] text-white py-2 rounded-full hover:bg-[#ebcc65] transition-colors">
+          Submit
+        </button>
+      </form>
+    </div>
+  );
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 overflow-auto p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      >
-        <motion.div
-          className="bg-white rounded-2xl overflow-hidden max-w-5xl w-full shadow-lg"
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 0.8 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Carousel */}
-          <div className="relative w-full h-96 bg-gray-100 flex items-center justify-center">
-            <img
-              src={images[currentImage].MediaURL}
-              alt={`Property image ${currentImage + 1}`}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white bg-black/50 p-2 rounded-full hover:bg-black/70 z-10"
-                >
-                  <FaChevronLeft size={20} />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-black/50 p-2 rounded-full hover:bg-black/70 z-10"
-                >
-                  <FaChevronRight size={20} />
-                </button>
-              </>
-            )}
-            {/* Badges */}
-            <div className="absolute top-2 left-2 flex gap-2">
-              {badges.map((b, i) => (
-                <span key={i} className="bg-[#d7595d] text-white px-3 py-1 rounded-full text-xs font-semibold">{b}</span>
-              ))}
-            </div>
-          </div>
+    <>
+      <ListingsModalHeader onBack={onClose} onShare={() => alert("Share this listing!")} logoSrc="/images/logo.png" />
 
-          {/* Property Details */}
-          <div className="p-6 space-y-4">
-            {/* Price & Address */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-              <h2 className="text-2xl font-bold text-[#d7595d]">{formatPrice(property.ListPrice)}</h2>
-              <p className="text-gray-700">{property.UnparsedAddress || "Address unavailable"}</p>
-            </div>
-
-           {/* Features Icons */}
-<div className="flex flex-wrap gap-4 text-gray-600 text-sm">
-  <div className="flex items-center gap-1">
-    <FaBed /> {property.BedroomsTotal ?? "N/A"} Beds
-  </div>
-  <div className="flex items-center gap-1">
-    <FaBath /> {(property.BathroomsFull ?? 0) + (property.BathroomsHalf ?? 0)} Baths
-  </div>
-  <div className="flex items-center gap-1">
-    <FaCar /> {property.GarageSpaces ?? property.Garage ?? "N/A"} Garage
-  </div>
-  <div className="flex items-center gap-1">
-    <FaRulerCombined /> {formatSqft(property.LivingArea ?? property.LotSizeTotal ?? property.SquareFootage)}
-  </div>
-  {/* Schools */}
-  <div className="flex flex-col gap-0.5">
-    <div className="flex items-center gap-1">
-      <FaMapMarkerAlt /> {property.HighSchool ?? "N/A"}
+      <AnimatePresence>
+<motion.div
+  className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 overflow-auto p-4"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  onClick={onClose}
+>
+  <motion.div
+    className="bg-white rounded-2xl overflow-hidden w-full max-w-[1200px] shadow-lg relative mt-10"
+    initial={{ scale: 0.8 }}
+    animate={{ scale: 1 }}
+    exit={{ scale: 0.8 }}
+    onClick={(e) => e.stopPropagation()}
+  >
+    {/* FULL WIDTH HERO */}
+    <div className="relative w-full overflow-hidden">
+      <ListingsModalHeroGallery
+        images={property?.Media || []}
+        onOpenGallery={() => console.log("Open gallery modal")}
+        height="h-[600px]" // or larger if you want
+      />
     </div>
-  </div>
-</div>
 
+            {/* Modal Content */}
+            <div className="w-full px-6 pt-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* LEFT */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <button onClick={onClose} className="text-gray-700 hover:underline">
+                      Back to Listings
+                    </button>
+                    <button className="flex items-center gap-1 text-gray-700 hover:text-[#d7595d] transition-colors">
+                      <FaShareAlt /> Share
+                    </button>
+                  </div>
 
+                  <ListingsModalPropertySummary property={property} />
+                  {property.Latitude && property.Longitude && (
+                    <ListingsModalMap lat={property.Latitude} lng={property.Longitude} />
+                  )}
+                  {property.community && <ListingsModalDetailsAccordion community={property.community} />}
+                </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-2">
-              <button className="bg-[#d7595d] hover:bg-[#ebcc65] text-white px-6 py-2 rounded-full font-medium transition">Schedule Viewing</button>
-              <a href={`tel:${property.AgentPhone || ""}`} className="bg-gray-100 hover:bg-gray-200 px-6 py-2 rounded-full text-gray-800 font-medium transition text-center">Call Agent</a>
-              <button className="bg-[#ebcc65] hover:bg-[#d7595d] text-white px-6 py-2 rounded-full font-medium transition flex items-center gap-2"><FaShareAlt /> Share</button>
-              <button className="bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-full font-medium transition flex items-center gap-2"><FaDownload /> Download PDF</button>
-            </div>
-
-            {/* Description */}
-            {property.Description && <p className="text-gray-600 mt-2">{property.Description}</p>}
-
-      {/* Map */}
-{isClient && property.Latitude && property.Longitude && (
-  <div className="w-full h-64 mt-4 rounded-lg overflow-hidden">
-    <MapContainer
-      center={[property.Latitude, property.Longitude]}
-      zoom={15}
-      scrollWheelZoom={false}
-      className="w-full h-full"
-    >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <Marker
-        position={[property.Latitude, property.Longitude]}
-        icon={customMarker} // <-- custom icon added here
-      >
-        <Popup>{property.UnparsedAddress}</Popup>
-      </Marker>
-    </MapContainer>
-  </div>
-)}
-
-            {/* Agent Info */}
-            {property.AgentName && (
-              <div className="mt-4 border-t pt-4 flex items-center gap-4">
-                {property.AgentPhoto && <img src={property.AgentPhoto} alt={property.AgentName} className="w-12 h-12 rounded-full object-cover" />}
-                <div>
-                  <p className="font-semibold">{property.AgentName}</p>
-                  <p className="text-sm text-gray-600">{property.AgentEmail || property.AgentPhone}</p>
+                {/* RIGHT */}
+                <div className="w-full md:w-80 flex-shrink-0 bg-gray-50 p-6 border-t md:border-t-0 md:border-l border-gray-200 space-y-5">
+                  {property.agent && <ListingsModalAgentSidebar agent={property.agent} />}
+                  <ListingsModalContactForm propertyId={property.ListingId} />
                 </div>
               </div>
-            )}
-
-            <button
-              onClick={onClose}
-              className="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-full font-medium transition"
-            >
-              Close
-            </button>
-          </div>
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 }
