@@ -43,7 +43,7 @@ export default function ListingsModalPropertySummary({ property }) {
       </p>
 
       {/* Key Details Grid with Icons */}
-      <div className="grid grid-cols-7 gap-6 text-gray-700 mt-2">
+      <div className="grid grid-cols-3 gap-6 text-gray-700 mt-2">
         <div className="flex items-center gap-2">
           <FaBed className="text-gray-500" size={16} />
           <span className="font-medium text-gray-900">{beds}</span>
