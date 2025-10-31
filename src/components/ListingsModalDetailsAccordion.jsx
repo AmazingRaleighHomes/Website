@@ -19,26 +19,59 @@ export default function ListingsModalDetailsAccordion({ data }) {
   return (
     <div className="relative space-y-4">
 
-      {/* Sticky Tour & Agent Info */}
-      <div className="sticky top-5 z-10 border border-gray-200 rounded-lg p-4 bg-white">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full bg-[#ebcc65] hover:bg-[#ebcc80] text-white font-semibold py-2 px-4 rounded"
-        >
-          Request a Tour
-        </button>
-        {showValue(data.ListAgentFullName) && (
-          <p className="mt-2 text-gray-700">
-            Phone:{" "}
-            <a
-              href={`tel:${data.ListAgentPhone || "9198027282"}`}
-              className="text-blue-600 underline"
-            >
-              {data.ListAgentPhone || "(919) 802-7282"}
-            </a>
-          </p>
-        )}
-      </div>
+{/* Sticky Tour & Agent Info */}
+<div className="sticky top-5 z-10 border border-gray-200 rounded-lg p-4 bg-white space-y-3">
+  {/* Request Tour Button */}
+  <button
+    onClick={() => setIsModalOpen(true)}
+    className="w-full bg-[#ebcc65] hover:bg-[#ebcc80] text-white font-semibold py-2 px-4 rounded transition"
+  >
+    Request a Tour
+  </button>
+
+  {/* Phone Button */}
+  <a
+    href={`tel:${data.ListAgentPhone || "9198027282"}`}
+    className="w-full flex items-center justify-center gap-2 border hover:bg-black/10 text-black font-regular py-2 px-4 rounded transition"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+      className="w-5 h-5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a1.5 1.5 0 001.5-1.5v-3.937a1.5 1.5 0 00-1.091-1.45l-3.583-1.02a1.5 1.5 0 00-1.63.55l-.972 1.215a11.042 11.042 0 01-5.516-5.516l1.215-.972a1.5 1.5 0 00.55-1.63l-1.02-3.583A1.5 1.5 0 005.687 3H2.25A1.5 1.5 0 00.75 4.5V6.75z"
+      />
+    </svg>
+    Call Agent
+  </a>
+
+  {/* Facebook Messenger Button */}
+  <a
+    href={`https://m.me/${data.ListAgentMessengerID || "YourPageUsername"}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-full flex items-center justify-center gap-2 border hover:bg-[#0073e6]/10 text-[#000] font-regular py-2 px-4 rounded transition"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      className="w-5 h-5"
+    >
+      <path d="M12 2C6.48 2 2 6.13 2 11.5c0 2.99 1.51 5.68 3.93 7.47V22l3.59-1.97c.8.22 1.65.34 2.48.34 5.52 0 10-4.13 10-9.5S17.52 2 12 2zm.13 12.83l-2.6-2.76-4.12 2.76 4.71-5.02 2.53 2.76 4.12-2.76-4.64 5.02z" />
+    </svg>
+    Message on Messenger
+  </a>
+</div>
+
+
+
 
       {/* Modal */}
       {isModalOpen && (
