@@ -9,6 +9,8 @@ import ListingsModalPropertySummary from "./ListingsModalPropertySummary";
 import ListingsModalDetailsAccordion from "./ListingsModalDetailsAccordion";
 import "leaflet/dist/leaflet.css";
 import ListingsModalHeroGallery from "./ListingsModalHeroGallery";
+import ListingsModalContactForm from "./ListingsModalContactForm";
+
 
 // Dynamically import react-leaflet components (SSR-safe)
 const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
@@ -79,24 +81,6 @@ export default function ListingsModal({ property, isOpen, onClose }) {
       </div>
     );
   };
-
-  // Contact Form
-  const ListingsModalContactForm = ({ propertyId }) => (
-    <div className="space-y-3 mt-4">
-      <h3 className="text-lg font-semibold">Request a Tour</h3>
-      <form className="space-y-2">
-        <input type="text" placeholder="First Name" className="w-full border border-gray-300 rounded-lg p-2" />
-        <input type="text" placeholder="Last Name" className="w-full border border-gray-300 rounded-lg p-2" />
-        <input type="email" placeholder="Email" className="w-full border border-gray-300 rounded-lg p-2" />
-        <input type="tel" placeholder="Phone" className="w-full border border-gray-300 rounded-lg p-2" />
-        <textarea placeholder="Message" className="w-full border border-gray-300 rounded-lg p-2" rows={3}></textarea>
-        <button type="submit" className="w-full bg-[#d7595d] text-white py-2 rounded-full hover:bg-[#ebcc65] transition-colors">
-          Submit
-        </button>
-      </form>
-    </div>
-  );
-
   return (
     <>
       <ListingsModalHeader onBack={onClose} onShare={() => alert("Share this listing!")} logoSrc="/images/logo.png" />
@@ -126,33 +110,48 @@ export default function ListingsModal({ property, isOpen, onClose }) {
     </div>
 
             {/* Modal Content */}
-            <div className="w-full px-6 pt-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* LEFT */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
-                    <button onClick={onClose} className="text-gray-700 hover:underline">
-                      Back to Listings
-                    </button>
-                    <button className="flex items-center gap-1 text-gray-700 hover:text-[#d7595d] transition-colors">
-                      <FaShareAlt /> Share
-                    </button>
-                  </div>
+<div className="w-full px-6 pt-6">
+  <div className="flex flex-col md:flex-row gap-6">
+    {/* LEFT COLUMN (2/3) */}
+    <div className="flex-1 min-w-0">
+      {/* Buttons Back / Share */}
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={onClose} className="text-gray-700 hover:underline">
+          Back to Listings
+        </button>
+        <button className="flex items-center gap-1 text-gray-700 hover:text-[#d7595d] transition-colors">
+          <FaShareAlt /> Share
+        </button>
+      </div>
 
-                  <ListingsModalPropertySummary property={property} />
-                  {property.Latitude && property.Longitude && (
-                    <ListingsModalMap lat={property.Latitude} lng={property.Longitude} />
-                  )}
-                  {property.community && <ListingsModalDetailsAccordion community={property.community} />}
-                </div>
+      {/* Property Summary */}
+      <ListingsModalPropertySummary property={property} />
 
-                {/* RIGHT */}
-                <div className="w-full md:w-80 flex-shrink-0 bg-gray-50 p-6 border-t md:border-t-0 md:border-l border-gray-200 space-y-5">
-                  {property.agent && <ListingsModalAgentSidebar agent={property.agent} />}
-                  <ListingsModalContactForm propertyId={property.ListingId} />
-                </div>
-              </div>
-            </div>
+      {/* Map */}
+      {property.Latitude && property.Longitude && (
+        <ListingsModalMap lat={property.Latitude} lng={property.Longitude} />
+      )}
+
+      {/* Community Details */}
+      {property.community && <ListingsModalDetailsAccordion community={property.community} />}
+
+      {/* Contact Form below the map */}
+      <div className="mt-6">
+        <ListingsModalContactForm 
+          propertyId={property.ListingId} 
+          property={property} 
+        />
+      </div>
+    </div>
+
+   {/* RIGHT COLUMN */}
+<div className="w-full md:w-1/3 flex-shrink-0 bg-gray-50 p-6 space-y-5 border-t md:border-t-0 md:border-l border-gray-200">
+  <ListingsModalDetailsAccordion data={property} />
+</div>
+
+  </div>
+</div>
+
           </motion.div>
         </motion.div>
       </AnimatePresence>
