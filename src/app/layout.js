@@ -35,7 +35,7 @@ export const metadata = {
     siteName: "Amazing Raleigh Durham Homes",
     images: [
       {
-        url: "https://www.amazingraleighdurhamhomes.com/og-image.jpg",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Amazing Raleigh Durham Homes",
