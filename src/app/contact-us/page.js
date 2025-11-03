@@ -124,9 +124,9 @@ export default function ContactPage() {
           >
             <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-3">
               <h3 className="text-xl font-semibold text-gray-900">Contact Info</h3>
-              <p className="text-gray-600">Email: info@amazingraleighhomes.com</p>
-              <p className="text-gray-600">Phone: (555) 123-4567</p>
-              <p className="text-gray-600">Address: 123 Main Street, Raleigh, NC</p>
+              <p className="text-gray-600">Email: mike@amazingraleighdurhamhomes.com</p>
+              <p className="text-gray-600">Phone: (919) 802-7282</p>
+              <p className="text-gray-600">Address: Raleigh, NC</p>
             </div>
 
             <div className="w-full h-64 rounded-2xl overflow-hidden shadow-lg">
