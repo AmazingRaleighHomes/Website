@@ -12,7 +12,7 @@ const agentsData = [
     name: "Michael Ulrich",
     area: "Raleigh-Durham",
     title: "Senior Agent",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    image: "/Agents.jpeg",
     email: "mike@amazingraleighdurhamhomes.com",
     phone: "(919) 802-7282",
   },
