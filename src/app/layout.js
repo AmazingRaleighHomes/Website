@@ -51,7 +51,7 @@ export const metadata = {
       "Browse top homes for sale in Raleigh and Durham and connect with trusted local agents.",
     site: "@AmazingRaleighHomes",
     creator: "@AmazingRaleighHomes",
-    images: ["https://www.amazingraleighdurhamhomes.com/og-image.jpg"],
+    images: ["/og-image.jpg"],
   },
 };
 
