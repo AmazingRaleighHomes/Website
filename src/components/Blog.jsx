@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 // Mock Blog Data
 const allPosts = [
   {
     id: 1,
-    title: "5 Tips to Find Your Dream Home",
+    title: "2026 Home Buying Guide for First-Time Buyers in Raleigh & Durham",
+    slug: "2026-home-buying-guide-raleigh-durham",
     category: "Buying",
     excerpt:
       "Discover the top strategies to secure your perfect home in today's market...",
@@ -18,6 +20,7 @@ const allPosts = [
   {
     id: 2,
     title: "Renovation Ideas That Add Value",
+    slug: "renovation-ideas-that-add-value",
     category: "Renovation",
     excerpt:
       "Increase your property value with these creative and practical renovation tips...",
@@ -28,6 +31,7 @@ const allPosts = [
   {
     id: 3,
     title: "Understanding Real Estate Investment",
+    slug: "understanding-real-estate-investment",
     category: "Investing",
     excerpt:
       "A beginner's guide to making smart real estate investments that pay off...",
@@ -38,6 +42,7 @@ const allPosts = [
   {
     id: 4,
     title: "Decorating Tips for Small Spaces",
+    slug: "decorating-tips-for-small-spaces",
     category: "Interior",
     excerpt:
       "Maximize your small living spaces with these stylish and functional tips...",
@@ -48,6 +53,7 @@ const allPosts = [
   {
     id: 5,
     title: "Top Neighborhoods to Buy in 2025",
+    slug: "top-neighborhoods-to-buy-in-2025",
     category: "Buying",
     excerpt:
       "Explore the most promising neighborhoods for real estate investment and living...",
@@ -58,6 +64,7 @@ const allPosts = [
   {
     id: 6,
     title: "Eco-Friendly Home Renovations",
+    slug: "eco-friendly-home-renovations",
     category: "Renovation",
     excerpt:
       "Sustainable renovations that reduce your footprint and increase your home’s value...",
@@ -71,7 +78,7 @@ const categories = ["All", "Buying", "Renovation", "Investing", "Interior"];
 
 export default function BlogSection() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [visibleCount, setVisibleCount] = useState(3); // show 3 posts initially
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const filteredPosts =
     activeCategory === "All"
@@ -81,7 +88,7 @@ export default function BlogSection() {
   const displayedPosts = filteredPosts.slice(0, visibleCount);
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 3); // load 3 more at a time
+    setVisibleCount((prev) => prev + 3);
   };
 
   return (
@@ -116,7 +123,7 @@ export default function BlogSection() {
               key={cat}
               onClick={() => {
                 setActiveCategory(cat);
-                setVisibleCount(3); // reset visible count on category change
+                setVisibleCount(3);
               }}
               className={`px-5 py-2 rounded-full font-medium transition ${
                 activeCategory === cat
@@ -136,7 +143,7 @@ export default function BlogSection() {
               key={post.id}
               layout
               whileHover={{ scale: 1.03 }}
-              className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer"
+              className="bg-white rounded-2xl shadow-md overflow-hidden"
             >
               <img
                 src={post.image}
@@ -149,9 +156,12 @@ export default function BlogSection() {
                   {post.title}
                 </h3>
                 <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                <button className="mt-2 text-[#ebcc65] font-semibold hover:underline">
-                  Read More
-                </button>
+
+                <Link href={`/blog/${post.slug}`} passHref>
+                  <button className="mt-2 text-[#ebcc65] font-semibold hover:underline">
+                    Read More
+                  </button>
+                </Link>
               </div>
             </motion.div>
           ))}
