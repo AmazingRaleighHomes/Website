@@ -40,7 +40,7 @@ export default function ListingsModalHeroGallery({ images = [] }) {
         {leftImage && (
           <div className="w-full sm:w-1/2 h-[200px] sm:h-full relative">
             <img
-              src={leftImage.MediaURL}
+              src={leftImage}
               alt="Primary"
               className="w-full h-full object-cover"
             />
@@ -52,7 +52,7 @@ export default function ListingsModalHeroGallery({ images = [] }) {
           {rightImages.map((img, idx) => (
             <div key={idx} className="w-full h-full relative">
               <img
-                src={img.MediaURL}
+                src={img}
                 alt={`Gallery ${idx + 1}`}
                 className="w-full h-full object-cover"
               />
@@ -65,7 +65,7 @@ export default function ListingsModalHeroGallery({ images = [] }) {
           {rightImages.map((img, idx) => (
             <img
               key={idx}
-              src={img.MediaURL}
+              src={img}
               alt={`Gallery thumb ${idx + 1}`}
               className="h-24 w-36 object-cover rounded-md flex-shrink-0"
             />
@@ -108,7 +108,7 @@ export default function ListingsModalHeroGallery({ images = [] }) {
 
             {/* Image */}
             <img
-              src={images[currentIndex].MediaURL}
+              src={images[currentIndex]}
               alt={`Gallery ${currentIndex + 1}`}
               className="max-h-full max-w-full object-contain select-none"
               draggable="false"
