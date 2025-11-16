@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaBed, FaBath, FaRulerCombined, FaLeaf } from "react-icons/fa";
 import ListingModal from "./ListingModal";
-import { FaShareAlt, FaBed, FaBath, FaRulerCombined, FaLeaf } from "react-icons/fa";
-
+import { supabase } from "@/lib/supabase"; 
 
 
 export default function MLSProperties({ filters = {} }) {
@@ -18,14 +17,18 @@ export default function MLSProperties({ filters = {} }) {
   const [imageIndexes, setImageIndexes] = useState({});
 
   const perPage = 12;
+  const propertyTypes = ["All", "Single Family", "Townhouse", "Condo", "Apartment"];
 
   useEffect(() => {
     async function fetchMLS() {
       setLoading(true);
       try {
-        const res = await fetch("/api/mls");
-        const data = await res.json();
-        if (data.error) setError(data.error);
+        const { data, error } = await supabase
+          .from("properties")
+          .select("*")
+          .order("dateAdded", { ascending: false });
+
+        if (error) setError(error.message);
         else setProperties(data || []);
       } catch (err) {
         setError(err.message);
@@ -36,50 +39,42 @@ export default function MLSProperties({ filters = {} }) {
     fetchMLS();
   }, []);
 
-  const propertyTypes = ["All", "Single Family", "Townhouse", "Condo", "Apartment"];
-
   // Filter & sorting
   let filtered =
     selectedType === "All"
       ? properties
-      : properties.filter((p) => p.PropertySubType === selectedType);
+      : properties.filter((p) => p.type === selectedType);
 
   if (filters.price && filters.price !== "Any Price") {
     const priceMax = (() => {
       switch (filters.price) {
-        case "$100k": return 100000;
-        case "$300k": return 300000;
-        case "$500k": return 500000;
+        case "$100k": return 100_000;
+        case "$300k": return 300_000;
+        case "$500k": return 500_000;
         case "$750k+": return Infinity;
         default: return Infinity;
       }
     })();
-    filtered = filtered.filter((p) => p.ListPrice <= priceMax);
+    filtered = filtered.filter((p) => p.price <= priceMax);
   }
 
   if (filters.query && filters.query.trim() !== "") {
     const query = filters.query.toLowerCase();
     filtered = filtered.filter(
       (p) =>
-        p.UnparsedAddress?.toLowerCase().includes(query) ||
-        p.PropertyType?.toLowerCase().includes(query)
+        p.address?.toLowerCase().includes(query) ||
+        p.type?.toLowerCase().includes(query)
     );
   }
 
-  const displayedProperties = filtered.slice(
-    (currentPage - 1) * perPage,
-    currentPage * perPage
-  );
+  const displayedProperties = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
   const maxPage = Math.ceil(filtered.length / perPage);
 
   const getImageIndex = (id) => imageIndexes[id] || 0;
   const changeImage = (id, direction, total) => {
     setImageIndexes((prev) => {
       const current = prev[id] || 0;
-      const next =
-        direction === "next"
-          ? (current + 1) % total
-          : (current - 1 + total) % total;
+      const next = direction === "next" ? (current + 1) % total : (current - 1 + total) % total;
       return { ...prev, [id]: next };
     });
   };
@@ -132,121 +127,106 @@ export default function MLSProperties({ filters = {} }) {
           ))}
         </div>
 
-        {loading && <p className="text-gray-500">Loading MLS listings...</p>}
-        {error && <p className="text-red-500">Error: {error}</p>}
+        {loading && <p className="text-gray-500">Finding your forever home...</p>}
+        {error && <p className="text-red-500">Oh no! I dropped the ball: {error}</p>}
 
         {/* Properties Grid */}
         {!loading && !error && (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {displayedProperties.map((property) => {
-              const id = property.ListingKey || property.Id;
-              const media = property?.Media || [];
+              const id = property.id;
+              const media = property.images || [];
               const totalImages = media.length || 1;
               const index = getImageIndex(id);
-              const currentImage = media[index]?.MediaURL || "/images/no-image.jpg";
-              const addedText = getTimeAgo(property?.OnMarketDate);
+              const currentImage = media[index] || "/images/no-image.jpg";
+              const addedText = getTimeAgo(property.dateAdded);
 
               return (
-<motion.div
-  key={id}
-  whileHover={{ scale: 1.03 }}
-  className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 relative"
-  onClick={() => setSelectedProperty(property)}
->
-  {/* Image Container */}
-  <div className="relative w-full h-56 bg-gray-200 rounded-t-2xl overflow-hidden">
-    {/* Main Image */}
-    <img
-      src={currentImage}
-      alt={property?.UnparsedAddress || "Property image"}
-      className="w-full h-full object-cover"
-    />
+                <motion.div
+                  key={id}
+                  whileHover={{ scale: 1.03 }}
+                  className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 relative"
+                  onClick={() => setSelectedProperty(property)}
+                >
+                  {/* Image Container */}
+                  <div className="relative w-full h-56 bg-gray-200 rounded-t-2xl overflow-hidden">
+                    <img
+                      src={currentImage}
+                      alt={property.address || "Property image"}
+                      className="w-full h-full object-cover"
+                    />
+                    {addedText && (
+                      <div className="absolute top-3 right-2 z-35 bg-[#ebcc65] text-white text-xs font-medium px-3 py-1 rounded-2xl shadow-lg pointer-events-none">
+                        New — {addedText}
+                      </div>
+                    )}
 
-    {/* "New" Badge (rounded pill, top-right) */}
-    {addedText && (
-      <div className="absolute top-3 right-2 z-50 bg-[#ebcc65] text-white text-xs font-medium px-3 py-1 rounded-2xl shadow-lg pointer-events-none">
-        New — {addedText}
-      </div>
-    )}
+                    {/* Carousel Arrows */}
+                    {totalImages > 1 && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            changeImage(id, "prev", totalImages);
+                          }}
+                          className="absolute top-1/2 left-2 -translate-y-1/2 z-35 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition pointer-events-auto"
+                          aria-label="Previous image"
+                        >
+                          <FaChevronLeft size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            changeImage(id, "next", totalImages);
+                          }}
+                          className="absolute top-1/2 right-2 -translate-y-1/2 z-35 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition pointer-events-auto"
+                          aria-label="Next image"
+                        >
+                          <FaChevronRight size={16} />
+                        </button>
+                      </>
+                    )}
+                  </div>
 
-    {/* Carousel Arrows */}
-    {totalImages > 1 && (
-      <>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            changeImage(id, "prev", totalImages);
-          }}
-          className="absolute top-1/2 left-2 -translate-y-1/2 z-50 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition pointer-events-auto"
-          aria-label="Previous image"
-        >
-          <FaChevronLeft size={16} />
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            changeImage(id, "next", totalImages);
-          }}
-          className="absolute top-1/2 right-2 -translate-y-1/2 z-50 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition pointer-events-auto"
-          aria-label="Next image"
-        >
-          <FaChevronRight size={16} />
-        </button>
-      </>
-    )}
-  </div>
+                  {/* Card Details */}
+                  <div className="p-4 text-left">
+                    <p className="text-lg font-semibold text-[#ebcc65]">
+                      ${property.price ? property.price.toLocaleString() : "N/A"}
+                    </p>
+                    <p className="text-gray-700 text-sm">{property.type || "Home"}</p>
 
-  {/* Card Details */}
-  <div className="p-4 text-left">
-    {/* Price */}
-    <p className="text-lg font-semibold text-[#ebcc65]">
-      ${property?.ListPrice ? property.ListPrice.toLocaleString() : "N/A"}
-    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-gray-500 text-xs mt-1">
+                      {property.beds && (
+                        <div className="flex items-center gap-1">
+                          <FaBed size={14} /> {property.beds}
+                        </div>
+                      )}
+                      {property.baths > 0 && (
+                        <div className="flex items-center gap-1">
+                          <FaBath size={14} /> {property.baths}
+                        </div>
+                      )}
+                      {property.sqft && (
+                        <div className="flex items-center gap-1">
+                          <FaRulerCombined size={14} /> {property.sqft.toLocaleString()} sqft
+                        </div>
+                      )}
+                      {property.acres && (
+                        <div className="flex items-center gap-1">
+                          <FaLeaf size={14} /> {property.acres} acres
+                        </div>
+                      )}
+                    </div>
 
-    {/* Property Type */}
-    <p className="text-gray-700 text-sm">
-      {property?.PropertySubType || property?.PropertyType || "Home"}
-    </p>
+                    <p className="text-gray-500 text-xs mt-1">
+                      {property.address || "Address unavailable"}
+                    </p>
 
-{/* Beds / Baths / Sqft / Acres */}
-<div className="flex flex-wrap items-center gap-4 text-gray-500 text-xs mt-1">
-  {property?.BedroomsTotal && (
-    <div className="flex items-center gap-1">
-      <FaBed size={14} /> {property.BedroomsTotal}
-    </div>
-  )}
-  {(property?.BathroomsFull ?? 0) + (property?.BathroomsHalf ?? 0) > 0 && (
-    <div className="flex items-center gap-1">
-      <FaBath size={14} /> {(property.BathroomsFull ?? 0) + (property.BathroomsHalf ?? 0)}
-    </div>
-  )}
-  {property?.LivingArea && (
-    <div className="flex items-center gap-1">
-      <FaRulerCombined size={14} /> {property.LivingArea.toLocaleString()} sqft
-    </div>
-  )}
-  {property?.LotSizeAcres && (
-    <div className="flex items-center gap-1">
-      <FaLeaf size={14} /> {property.LotSizeAcres} acres
-    </div>
-  )}
-</div>
-
-
-    {/* Address */}
-    <p className="text-gray-500 text-xs mt-1">
-      {property?.UnparsedAddress || "Address unavailable"}
-    </p>
-
-    {/* View Details Button */}
-    <button className="mt-3 w-full bg-[#ebcc65] hover:bg-[#d7595d] text-white py-2 rounded-full text-sm font-medium transition border border-white shadow-inner hover:shadow-lg">
-      View Details
-    </button>
-  </div>
-</motion.div>
-
-
-
+                    <button className="mt-3 w-full bg-[#ebcc65] hover:bg-[#d7595d] text-white py-2 rounded-full text-sm font-medium transition border border-white shadow-inner hover:shadow-lg">
+                      View Details
+                    </button>
+                  </div>
+                </motion.div>
               );
             })}
           </div>
