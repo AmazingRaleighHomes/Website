@@ -1,67 +1,58 @@
-// app/api/mls/route.js
 import { LRUCache } from "lru-cache";
+import { supabase } from "@/lib/supabase";
 
-const cache = new LRUCache({ max: 20, ttl: 60 * 1000 }); // cache 20 pages for 1 minute
+
+
+
+
+
+const cache = new LRUCache({ max: 50, ttl: 5 * 60 * 1000 }); // 5 min cache
 
 export async function GET(req) {
-  const token = process.env.SPARK_ACCESS_TOKEN;
-  const baseUrl = "https://replication.sparkapi.com/Version/3/Reso/OData/Property";
-
-  if (!token) {
-    return new Response(
-      JSON.stringify({ error: "Missing SPARK_ACCESS_TOKEN" }),
-      { status: 500 }
-    );
-  }
-
   try {
     const url = new URL(req.url);
     const flatten = url.searchParams.get("flatten") === "true";
+    const limit = parseInt(url.searchParams.get("limit") || "1000", 10);
+    const cacheKey = flatten ? `mls-flat-${limit}` : `mls-full-${limit}`;
 
-    const cacheKey = flatten ? "mls-flat" : "mls-full";
+    // Return cached response if available
     const cached = cache.get(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { status: 200 });
 
-    // Full data for your landing page (safe default)
-    const query = `${baseUrl}?$top=200&$expand=Media&$orderby=OnMarketDate desc`;
+    // Fetch listings from Supabase
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .order("dateAdded", { ascending: false })
+      .limit(limit);
 
-    const response = await fetch(query, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
+    if (error) {
       return new Response(
-        JSON.stringify({ error: "Spark API request failed", details: data }),
-        { status: response.status }
+        JSON.stringify({ error: "Supabase query failed", details: error.message }),
+        { status: 500 }
       );
     }
 
-    let result = data.value || [];
+    let result = data;
 
+    // Flatten if requested
     if (flatten) {
-      result = result.map((p) => ({
-        id: p.Id,
-        price: p.ListPrice || 0,
-        type: p.PropertySubType || p.PropertyType || "Home",
-        beds: p.BedroomsTotal || 0,
-        baths: (p.BathroomsFull || 0) + (p.BathroomsHalf || 0),
-        sqft: p.LivingArea || 0,
-        acres: p.LotSizeAcres || 0,
-        address: p.UnparsedAddress || "N/A",
-        images: p.Media?.map((m) => m.MediaURL) || ["/images/no-image.jpg"],
-        dateAdded: p.OnMarketDate || null,
+      result = data.map((p) => ({
+        id: p.id,
+        price: p.price,
+        type: p.type,
+        beds: p.beds,
+        baths: p.baths,
+        sqft: p.sqft,
+        acres: p.acres,
+        address: p.address,
+        images: p.images || ["/images/no-image.jpg"],
+        dateAdded: p.dateAdded,
       }));
     }
 
     cache.set(cacheKey, result);
     return new Response(JSON.stringify(result), { status: 200 });
-
   } catch (err) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch MLS data", details: err.message }),
