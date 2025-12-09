@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import emailjs from "@emailjs/browser";
 
 export default function ListingsModalContactForm({ property }) {
   const [formData, setFormData] = useState({
@@ -15,10 +16,10 @@ export default function ListingsModalContactForm({ property }) {
 
   // Auto-fill the message when property loads
   useEffect(() => {
-    if (property?.UnparsedAddress) {
+    if (property?.address) {
       setFormData((prev) => ({
         ...prev,
-        message: `Hi, I’m interested in scheduling a tour for ${property.UnparsedAddress}. Please let me know available times.`,
+        message: `Hi, I’m interested in scheduling a tour for ${property.address}. Please let me know available times.`,
       }));
     }
   }, [property]);
@@ -38,42 +39,56 @@ export default function ListingsModalContactForm({ property }) {
     setStatus("loading");
 
     try {
-      const submission = {
+      const templateParams = {
         propertyId: property.ListingId,
-        propertyAddress: property.UnparsedAddress,
-        propertyTitle: property.Title || "",
-        ...formData,
+        propertyAddress: property.address,
+        propertyTitle: property.ListingName || "Property Inquiry",
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
       };
 
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submission),
-      });
+      console.log("Sending template params:", templateParams); // optional debug
 
-      if (response.ok) {
+      const response = await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+        templateParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+      );
+
+      if (response.status === 200) {
         setStatus("success");
+
+        // Reset form but keep auto-filled message
         setFormData((prev) => ({
           ...prev,
           firstName: "",
           lastName: "",
           email: "",
           phone: "",
-          message: `Hi, I’m interested in scheduling a tour for ${property.UnparsedAddress}. Please let me know available times.`,
+          message: `Hi, I’m interested in scheduling a tour for ${property.address}. Please let me know available times.`,
         }));
       } else {
         setStatus("error");
       }
     } catch (err) {
+      console.error("EmailJS error:", err);
       setStatus("error");
     }
   };
 
+  if (!property) return null;
+
   return (
     <div className="space-y-3 mt-4 mb-8">
-      <h3 className="text-2xl font-bold text-gray-900 leading-tight text-left">Request a Tour</h3>
+      <h3 className="text-2xl font-bold text-gray-900 leading-tight text-left">
+        Request a Tour
+      </h3>
       <p className="text-gray-600 text-sm text-left">
-        Request a tour for <strong>{property.UnparsedAddress}</strong>
+        Request a tour for <strong>{property.address}</strong>
       </p>
 
       <form className="space-y-2" onSubmit={handleSubmit}>
@@ -123,7 +138,7 @@ export default function ListingsModalContactForm({ property }) {
           className={`w-full py-2 rounded-full text-white transition-colors ${
             status === "loading"
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#d7595d] hover:bg-[#ebcc65]"
+              : "bg-[#ebcc65] hover:bg-[#ebcc65]"
           }`}
           disabled={status === "loading"}
         >
@@ -131,11 +146,18 @@ export default function ListingsModalContactForm({ property }) {
         </button>
       </form>
 
-      {status === "success" && <p className="text-green-500">Request sent successfully!</p>}
-      {status === "error" && <p className="text-red-500">Something went wrong. Try again.</p>}
-      {status && status !== "success" && status !== "error" && status !== "loading" && (
-        <p className="text-red-500">{status}</p>
+      {status === "success" && (
+        <p className="text-green-500">Request sent successfully!</p>
       )}
+      {status === "error" && (
+        <p className="text-red-500">Something went wrong. Try again.</p>
+      )}
+      {status &&
+        status !== "success" &&
+        status !== "error" &&
+        status !== "loading" && (
+          <p className="text-red-500">{status}</p>
+        )}
     </div>
   );
 }
