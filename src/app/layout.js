@@ -12,9 +12,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://www.amazingraleighdurhamhomes.com"),
   title: "Ulrich Realty | Raleigh-Durham Real Estate",
   description:
     "Search Raleigh-Durham homes, explore neighborhoods, and connect with Ulrich Realty for local real estate guidance.",
+  openGraph: {
+    title: "Ulrich Realty | Raleigh-Durham Real Estate",
+    description:
+      "Search Raleigh-Durham homes, explore neighborhoods, and connect with Ulrich Realty for local real estate guidance.",
+    url: "https://www.amazingraleighdurhamhomes.com",
+    siteName: "Ulrich Realty",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Ulrich Realty Raleigh-Durham Real Estate",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ulrich Realty | Raleigh-Durham Real Estate",
+    description:
+      "Search Raleigh-Durham homes, explore neighborhoods, and connect with Ulrich Realty for local real estate guidance.",
+    images: ["/og-image.jpg"],
+  },
   icons: {
     icon: [
       { url: "/favicon/favicon.ico" },
