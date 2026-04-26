@@ -5,6 +5,23 @@ export function getPrimaryImageUrl(property) {
   return images[0] || null;
 }
 
+export async function getAllListingIds() {
+  const { data, error } = await supabaseAdmin
+    .from("properties")
+    .select("*")
+    .limit(5000);
+
+  if (error) {
+    console.error("Supabase listing ID fetch error:", error);
+    return [];
+  }
+
+  return (data || [])
+    .map((property) => property.ListingId || property.listingId || property.id)
+    .filter(Boolean)
+    .map((value) => String(value));
+}
+
 export async function getPropertyByListingId(listingId) {
   if (!listingId) return null;
 
