@@ -3,10 +3,25 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-export default function HeroSection({ selectedArea, onSearch }) {
+export default function HeroSection({ selectedArea, setSelectedArea, onSearch }) {
   const [propertyValue, setPropertyValue] = useState("Any Price");
   const [query, setQuery] = useState("");
   const propertyOptions = ["Any Price", "$100k", "$300k", "$500k", "$750k+"];
+  const areaOptions = [
+    "Raleigh-Durham",
+    "Raleigh",
+    "Durham",
+    "Cary",
+    "Apex",
+    "Wake Forest",
+    "Chapel Hill",
+  ];
+  const quickSearches = [
+    { label: "Homes in Raleigh", query: "Raleigh", area: "Raleigh" },
+    { label: "Homes in Cary", query: "Cary", area: "Cary" },
+    { label: "Luxury Homes", query: "Luxury", area: "Raleigh-Durham" },
+    { label: "New Listings", query: "", area: "Raleigh-Durham", price: "Any Price" },
+  ];
 
   const scrollToMLS = () => {
     const target = document.getElementById("mls-listings");
@@ -80,7 +95,7 @@ export default function HeroSection({ selectedArea, onSearch }) {
                 Search
                 <input
                   type="text"
-                  placeholder="Location, neighborhood, address, or MLS #"
+                  placeholder="Search by city, neighborhood, address, or MLS #"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="mt-1.5 bg-transparent text-[15px] normal-case tracking-normal text-[var(--foreground)] outline-none placeholder:text-[#94897f]"
@@ -89,9 +104,17 @@ export default function HeroSection({ selectedArea, onSearch }) {
 
               <label className="flex flex-col rounded-[1.25rem] border border-[var(--border)] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73]">
                 Area
-                <div className="mt-1.5 text-[15px] font-medium normal-case tracking-normal text-[var(--foreground)]">
-                  {selectedArea || "Raleigh-Durham"}
-                </div>
+                <select
+                  value={selectedArea || "Raleigh-Durham"}
+                  onChange={(e) => setSelectedArea?.(e.target.value)}
+                  className="mt-1.5 bg-transparent text-[15px] font-medium normal-case tracking-normal text-[var(--foreground)] outline-none"
+                >
+                  {areaOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="flex flex-col rounded-[1.25rem] border border-[var(--border)] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73]">
@@ -117,28 +140,23 @@ export default function HeroSection({ selectedArea, onSearch }) {
               </button>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-1 text-sm text-[var(--muted)]">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 px-1 text-sm text-[var(--muted)]">
               <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#9b5a40]">
-                Popular
+                Quick Search
               </span>
-              <button
-                onClick={() => setQuery("North Hills")}
-                className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
-              >
-                North Hills
-              </button>
-              <button
-                onClick={() => setQuery("Cary")}
-                className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
-              >
-                Cary
-              </button>
-              <button
-                onClick={() => setQuery("Durham")}
-                className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
-              >
-                Durham
-              </button>
+              {quickSearches.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => {
+                    setQuery(item.query);
+                    setSelectedArea?.(item.area);
+                    if (item.price) setPropertyValue(item.price);
+                  }}
+                  className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           </motion.div>
 

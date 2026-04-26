@@ -127,7 +127,17 @@ export default function MLSProperties({ filters = {} }) {
     filtered = filtered.filter(
       (p) =>
         p.address?.toLowerCase().includes(query) ||
-        p.type?.toLowerCase().includes(query)
+        p.type?.toLowerCase().includes(query) ||
+        p.subdivision?.toLowerCase().includes(query)
+    );
+  }
+
+  if (filters.area && filters.area !== "Raleigh-Durham") {
+    const areaQuery = filters.area.toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.address?.toLowerCase().includes(areaQuery) ||
+        p.subdivision?.toLowerCase().includes(areaQuery)
     );
   }
 
@@ -164,6 +174,32 @@ export default function MLSProperties({ filters = {} }) {
     const diffDays = Math.floor(diffHours / 24);
     return `Added ${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
+
+  const resultsSummary = (() => {
+    const summaryParts = [];
+
+    if (filters.area) {
+      summaryParts.push(
+        filters.area === "Raleigh-Durham" ? "across Raleigh-Durham" : `in ${filters.area}`
+      );
+    }
+
+    if (filters.query?.trim()) {
+      summaryParts.push(`matching "${filters.query.trim()}"`);
+    }
+
+    if (filters.price && filters.price !== "Any Price") {
+      summaryParts.push(`under ${filters.price}`);
+    }
+
+    if (selectedType !== "All") {
+      summaryParts.push(`for ${selectedType.toLowerCase()} homes`);
+    }
+
+    return summaryParts.length > 0
+      ? `Showing ${filtered.length} ${filtered.length === 1 ? "home" : "homes"} ${summaryParts.join(" ")}`
+      : `Showing ${filtered.length} ${filtered.length === 1 ? "home" : "homes"} across Raleigh-Durham`;
+  })();
 
   return (
     <section id="mls-listings" className="bg-[#f6f1e8] py-20">
@@ -205,6 +241,12 @@ export default function MLSProperties({ filters = {} }) {
             </button>
           ))}
         </div>
+
+        {!loading && !error && (
+          <div className="mb-8 rounded-[1.4rem] border border-[#e6ddd4] bg-[#fffaf5] px-5 py-4 text-center text-sm leading-6 text-[#6f675f] shadow-sm">
+            <span className="font-semibold text-[#1f1c17]">Results:</span> {resultsSummary}
+          </div>
+        )}
 
         {loading && <p className="text-center text-[#6f675f]">Finding your forever home...</p>}
         {error && <p className="text-center text-red-500">Oh no! I dropped the ball: {error}</p>}
