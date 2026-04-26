@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,8 +25,14 @@ export default function Navbar() {
       <div className="border-b border-[#d9cdc2]/70 bg-white/92 backdrop-blur-md shadow-[0_8px_30px_rgba(54,40,28,0.08)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 text-[#1f1c17] sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e7d5ca] bg-[#fff6f1] text-sm font-semibold tracking-[0.2em] text-[#d86a45]">
-              UR
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-[#e7d5ca] bg-white p-2 shadow-sm">
+              <Image
+                src="/favicon/favicon.svg"
+                alt="Ulrich Realty logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+              />
             </div>
             <div>
               <div className="text-lg font-semibold uppercase tracking-[0.18em]">
