@@ -2,12 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getPropertyByListingId } from "@/lib/listings";
-
-function getPrimaryImage(property) {
-  const images = property?.images || property?.Media || [];
-  return images[0] || "/og-image.jpg";
-}
+import { getPropertyByListingId, getPrimaryImageUrl } from "@/lib/listings";
 
 function formatPrice(value) {
   return value ? `$${Number(value).toLocaleString()}` : "Price on request";
@@ -32,8 +27,10 @@ export async function generateMetadata({ params }) {
     property.description ||
     property.PublicRemarks ||
     `View photos, pricing, and property details for ${property.address || "this Raleigh-Durham listing"} with Ulrich Realty.`;
-  const image = getPrimaryImage(property);
   const canonicalUrl = `https://www.amazingraleighdurhamhomes.com/listing/${listingId}`;
+  const proxiedImageUrl = `https://www.amazingraleighdurhamhomes.com/api/listing-image/${listingId}`;
+  const fallbackImageUrl = "https://www.amazingraleighdurhamhomes.com/og-image.jpg";
+  const image = getPrimaryImageUrl(property) ? proxiedImageUrl : fallbackImageUrl;
 
   return {
     title: `${title} | Ulrich Realty`,
@@ -49,6 +46,8 @@ export async function generateMetadata({ params }) {
       images: [
         {
           url: image,
+          width: 1200,
+          height: 630,
           alt: title,
         },
       ],
@@ -75,7 +74,7 @@ export default async function ListingSharePage({ params }) {
     property.ListingName ||
     property.address ||
     `Listing ${listingId}`;
-  const image = getPrimaryImage(property);
+  const image = getPrimaryImageUrl(property) || "/og-image.jpg";
   const detailUrl = `/?listing=${listingId}`;
 
   return (
