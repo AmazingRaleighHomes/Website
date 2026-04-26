@@ -29,6 +29,12 @@ export default function MLSProperties({ filters = {} }) {
   const perPage = 12;
   const propertyTypes = ["All", "Single Family", "Townhouse", "Condo", "Apartment"];
   const listingParam = searchParams.get("listing");
+  const normalizeSearchText = (value) =>
+    String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
   useEffect(() => {
     async function fetchMLS() {
@@ -123,21 +129,39 @@ export default function MLSProperties({ filters = {} }) {
   }
 
   if (filters.query && filters.query.trim() !== "") {
-    const query = filters.query.toLowerCase();
-    filtered = filtered.filter(
-      (p) =>
-        p.address?.toLowerCase().includes(query) ||
-        p.type?.toLowerCase().includes(query) ||
-        p.subdivision?.toLowerCase().includes(query)
-    );
+    const normalizedQuery = normalizeSearchText(filters.query);
+    const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+
+    filtered = filtered.filter((p) => {
+      const searchableText = normalizeSearchText(
+        [
+          p.address,
+          p.UnparsedAddress,
+          p.ListingName,
+          p.subdivision,
+          p.city,
+          p.City,
+          p.type,
+          p.zip,
+          p.postalCode,
+          p.PostalCode,
+          p.ListingId,
+        ].join(" ")
+      );
+
+      if (!searchableText) return false;
+
+      return queryTokens.every((token) => searchableText.includes(token));
+    });
   }
 
   if (filters.area && filters.area !== "Raleigh-Durham") {
-    const areaQuery = filters.area.toLowerCase();
+    const areaQuery = normalizeSearchText(filters.area);
     filtered = filtered.filter(
       (p) =>
-        p.address?.toLowerCase().includes(areaQuery) ||
-        p.subdivision?.toLowerCase().includes(areaQuery)
+        normalizeSearchText(
+          [p.address, p.UnparsedAddress, p.subdivision, p.city, p.City].join(" ")
+        ).includes(areaQuery)
     );
   }
 
