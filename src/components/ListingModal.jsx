@@ -95,35 +95,32 @@ export default function ListingModal({ property, isOpen, onClose }) {
       <ListingsModalHeader
         onBack={onClose}
         onShare={() => alert("Share this listing!")}
-        logoSrc="/images/logo.png"
+        logoSrc="/favicon/favicon.svg"
       />
 
       <AnimatePresence>
         <motion.div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 overflow-auto p-4"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-black/70 p-4 sm:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="bg-white rounded-2xl overflow-hidden w-full max-w-[1200px] shadow-lg relative mt-10"
+            className="relative mt-8 w-full max-w-[1240px] overflow-hidden rounded-[2rem] border border-[#e6ddd4] bg-[#f6f1e8] shadow-[0_35px_90px_rgba(0,0,0,0.28)]"
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0.8 }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* HERO GALLERY */}
             <ListingsModalHeroGallery
               images={property.images || property.Media || []}
               height="h-[600px]"
             />
 
-            {/* MAIN CONTENT */}
-            <div className="w-full px-6 pt-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* LEFT COLUMN */}
-                <div className="flex-1 min-w-0 space-y-6">
+            <div className="w-full px-4 py-5 sm:px-6 sm:py-6">
+              <div className="flex flex-col gap-6 lg:flex-row">
+                <div className="min-w-0 flex-1 space-y-6">
                   <ListingsModalPropertySummary
                     property={{
                       ...property,
@@ -141,15 +138,15 @@ export default function ListingModal({ property, isOpen, onClose }) {
                     />
                   )}
 
-                  {/* Contact Form */}
-                  <ListingsModalContactForm
-                    propertyId={property.ListingId}
-                    property={property}
-                  />
+                  <div id="tour-request">
+                    <ListingsModalContactForm
+                      propertyId={property.ListingId}
+                      property={property}
+                    />
+                  </div>
                 </div>
 
-                {/* RIGHT COLUMN */}
-                <div className="w-full md:w-1/3 flex-shrink-0 bg-gray-50 p-6 space-y-5 border-t md:border-t-0 md:border-l border-gray-200">
+                <div className="w-full flex-shrink-0 lg:w-[340px]">
                   <ListingsModalDetailsAccordion data={property} />
                 </div>
               </div>

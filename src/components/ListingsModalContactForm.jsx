@@ -12,9 +12,8 @@ export default function ListingsModalContactForm({ property }) {
     message: "",
   });
 
-  const [status, setStatus] = useState(""); // success, error, loading
+  const [status, setStatus] = useState("");
 
-  // Auto-fill the message when property loads
   useEffect(() => {
     if (property?.address) {
       setFormData((prev) => ({
@@ -50,8 +49,6 @@ export default function ListingsModalContactForm({ property }) {
         message: formData.message,
       };
 
-      console.log("Sending template params:", templateParams); // optional debug
-
       const response = await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
@@ -61,8 +58,6 @@ export default function ListingsModalContactForm({ property }) {
 
       if (response.status === 200) {
         setStatus("success");
-
-        // Reset form but keep auto-filled message
         setFormData((prev) => ({
           ...prev,
           firstName: "",
@@ -83,80 +78,90 @@ export default function ListingsModalContactForm({ property }) {
   if (!property) return null;
 
   return (
-    <div className="space-y-3 mt-4 mb-8">
-      <h3 className="text-2xl font-bold text-gray-900 leading-tight text-left">
-        Request a Tour
+    <div className="rounded-[2rem] border border-[#e6ddd4] bg-[#fffaf5] p-6 shadow-[0_20px_60px_rgba(48,36,24,0.06)]">
+      <p className="text-sm uppercase tracking-[0.24em] text-[#a15b41]">
+        Request A Tour
+      </p>
+      <h3 className="mt-3 text-3xl font-semibold leading-tight text-[#1f1c17]">
+        Ask about this home.
       </h3>
-      <p className="text-gray-600 text-sm text-left">
-        Request a tour for <strong>{property.address}</strong>
+      <p className="mt-3 text-sm leading-6 text-[#6f675f]">
+        Reach out about <strong>{property.address}</strong> and Ulrich Realty
+        will follow up about availability, timing, and next steps.
       </p>
 
-      <form className="space-y-2" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="firstName"
-          placeholder="First Name*"
-          value={formData.firstName}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg p-2"
-        />
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Last Name"
-          value={formData.lastName}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg p-2"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email*"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg p-2"
-        />
-        <input
-          type="tel"
-          name="phone"
-          placeholder="Phone*"
-          value={formData.phone}
-          onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg p-2"
-        />
+      <form className="mt-6 space-y-3" onSubmit={handleSubmit}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input
+            type="text"
+            name="firstName"
+            placeholder="First name*"
+            value={formData.firstName}
+            onChange={handleChange}
+            className="w-full rounded-[1.1rem] border border-[#d8cec4] bg-white px-4 py-3 text-[#1f1c17] outline-none transition focus:border-[#d86a45]"
+          />
+          <input
+            type="text"
+            name="lastName"
+            placeholder="Last name"
+            value={formData.lastName}
+            onChange={handleChange}
+            className="w-full rounded-[1.1rem] border border-[#d8cec4] bg-white px-4 py-3 text-[#1f1c17] outline-none transition focus:border-[#d86a45]"
+          />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email*"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full rounded-[1.1rem] border border-[#d8cec4] bg-white px-4 py-3 text-[#1f1c17] outline-none transition focus:border-[#d86a45]"
+          />
+          <input
+            type="tel"
+            name="phone"
+            placeholder="Phone*"
+            value={formData.phone}
+            onChange={handleChange}
+            className="w-full rounded-[1.1rem] border border-[#d8cec4] bg-white px-4 py-3 text-[#1f1c17] outline-none transition focus:border-[#d86a45]"
+          />
+        </div>
+
         <textarea
           name="message"
           placeholder="Message"
           value={formData.message}
           onChange={handleChange}
-          rows={4}
-          className="w-full border border-gray-300 rounded-lg p-2"
+          rows={5}
+          className="w-full rounded-[1.4rem] border border-[#d8cec4] bg-white px-4 py-3 text-[#1f1c17] outline-none transition resize-none focus:border-[#d86a45]"
         ></textarea>
 
         <button
           type="submit"
-          className={`w-full py-2 rounded-full text-white transition-colors ${
+          className={`inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] transition ${
             status === "loading"
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#ebcc65] hover:bg-[#ebcc65]"
+              ? "cursor-not-allowed bg-gray-400 text-white"
+              : "bg-[#d86a45] text-white hover:bg-[#bf5532]"
           }`}
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Submitting..." : "Submit"}
+          {status === "loading" ? "Submitting..." : "Submit Tour Request"}
         </button>
       </form>
 
       {status === "success" && (
-        <p className="text-green-500">Request sent successfully!</p>
+        <p className="mt-4 text-sm text-green-600">Request sent successfully.</p>
       )}
       {status === "error" && (
-        <p className="text-red-500">Something went wrong. Try again.</p>
+        <p className="mt-4 text-sm text-red-500">Something went wrong. Try again.</p>
       )}
       {status &&
         status !== "success" &&
         status !== "error" &&
         status !== "loading" && (
-          <p className="text-red-500">{status}</p>
+          <p className="mt-4 text-sm text-red-500">{status}</p>
         )}
     </div>
   );

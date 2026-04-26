@@ -16,97 +16,98 @@ export default function ListingsModalHeroGallery({ images = [] }) {
   const openGallery = () => setIsGalleryOpen(true);
   const closeGallery = () => setIsGalleryOpen(false);
 
-  if (images.length === 0)
-    return <div className="w-full h-[300px] sm:h-[600px] bg-gray-200" />;
+  if (images.length === 0) {
+    return <div className="h-[320px] w-full bg-[#ece4db] sm:h-[560px]" />;
+  }
 
-  // Primary image
   const leftImage = images[0];
-  // Next up to 4 images
   const rightImages = images.slice(1, 5);
 
-  // Swipe handling for mobile fullscreen
-  const handleTouchStart = (e) => (startX.current = e.touches[0].clientX);
+  const handleTouchStart = (e) => {
+    startX.current = e.touches[0].clientX;
+  };
+
   const handleTouchEnd = (e) => {
     const diff = startX.current - e.changedTouches[0].clientX;
-    if (diff > 50) handleNext(); // Swipe left
-    if (diff < -50) handlePrev(); // Swipe right
+    if (diff > 50) handleNext();
+    if (diff < -50) handlePrev();
   };
 
   return (
     <>
-      {/* GALLERY PREVIEW */}
-      <div className="w-full h-[300px] sm:h-[600px] flex flex-col sm:flex-row gap-2 relative overflow-hidden rounded-t-2xl">
-        {/* LEFT MAIN IMAGE */}
-        {leftImage && (
-          <div className="w-full sm:w-1/2 h-[200px] sm:h-full relative">
-            <img
-              src={leftImage}
-              alt="Primary"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        {/* RIGHT SIDE GRID (only visible on desktop) */}
-        <div className="hidden sm:grid sm:w-1/2 sm:h-full grid-cols-2 grid-rows-2 gap-2">
-          {rightImages.map((img, idx) => (
-            <div key={idx} className="w-full h-full relative">
+      <div className="relative overflow-hidden border-b border-[#e6ddd4] bg-[#f3ece4]">
+        <div className="grid gap-2 p-2 sm:grid-cols-[1.2fr_0.8fr] sm:p-3">
+          {leftImage && (
+            <div className="relative h-[260px] overflow-hidden rounded-[1.6rem] sm:h-[560px]">
               <img
-                src={img}
-                alt={`Gallery ${idx + 1}`}
-                className="w-full h-full object-cover"
+                src={leftImage}
+                alt="Primary property photo"
+                className="h-full w-full object-cover"
               />
             </div>
-          ))}
+          )}
+
+          <div className="hidden grid-cols-2 grid-rows-2 gap-2 sm:grid">
+            {rightImages.map((img, idx) => (
+              <div key={idx} className="relative overflow-hidden rounded-[1.25rem]">
+                <img
+                  src={img}
+                  alt={`Gallery ${idx + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* MOBILE STRIP of extra images */}
-        <div className="flex sm:hidden w-full gap-2 overflow-x-auto px-2 mt-2 scrollbar-hide">
-          {rightImages.map((img, idx) => (
-            <img
+        <div className="flex gap-2 overflow-x-auto px-3 pb-3 sm:hidden scrollbar-hide">
+          {images.map((img, idx) => (
+            <button
               key={idx}
-              src={img}
-              alt={`Gallery thumb ${idx + 1}`}
-              className="h-24 w-36 object-cover rounded-md flex-shrink-0"
-            />
+              onClick={() => {
+                setCurrentIndex(idx);
+                openGallery();
+              }}
+              className="overflow-hidden rounded-[1rem] flex-shrink-0"
+            >
+              <img
+                src={img}
+                alt={`Gallery thumb ${idx + 1}`}
+                className="h-24 w-36 object-cover"
+              />
+            </button>
           ))}
         </div>
 
-        {/* VIEW BUTTON */}
         <button
           onClick={openGallery}
-          className="absolute right-4 bottom-4 bg-[#ebcc65] text-black font-medium px-4 py-2 rounded-full shadow hover:opacity-90 transition z-10 text-sm sm:text-base"
+          className="absolute bottom-6 right-6 rounded-full border border-[#e2b39f]/40 bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-[#1f1c17] shadow-lg transition hover:bg-[#f5ede8]"
         >
           View All Photos
         </button>
       </div>
 
-      {/* FULLSCREEN GALLERY MODAL */}
       {isGalleryOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2 sm:p-4"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/90 p-2 sm:p-4"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Close */}
           <button
             onClick={closeGallery}
-            className="absolute top-4 right-4 text-white text-2xl sm:text-3xl z-10 bg-black/40 p-2 rounded-full hover:bg-black/60"
+            className="absolute right-4 top-4 z-10 rounded-full bg-black/40 p-3 text-2xl text-white transition hover:bg-black/60"
           >
             <FaTimes />
           </button>
 
-          {/* Image container */}
-          <div className="relative w-full max-w-5xl h-[90vh] flex items-center justify-center">
-            {/* Prev */}
+          <div className="relative flex h-[90vh] w-full max-w-6xl items-center justify-center">
             <button
               onClick={handlePrev}
-              className="absolute left-3 sm:left-6 text-white text-2xl sm:text-3xl bg-black/30 p-3 sm:p-4 rounded-full hover:bg-black/50 z-10 active:scale-95 transition"
+              className="absolute left-3 z-10 rounded-full bg-black/30 p-3 text-2xl text-white transition hover:bg-black/50 sm:left-6 sm:p-4 sm:text-3xl"
             >
               <FaChevronLeft />
             </button>
 
-            {/* Image */}
             <img
               src={images[currentIndex]}
               alt={`Gallery ${currentIndex + 1}`}
@@ -114,16 +115,14 @@ export default function ListingsModalHeroGallery({ images = [] }) {
               draggable="false"
             />
 
-            {/* Next */}
             <button
               onClick={handleNext}
-              className="absolute right-3 sm:right-6 text-white text-2xl sm:text-3xl bg-black/30 p-3 sm:p-4 rounded-full hover:bg-black/50 z-10 active:scale-95 transition"
+              className="absolute right-3 z-10 rounded-full bg-black/30 p-3 text-2xl text-white transition hover:bg-black/50 sm:right-6 sm:p-4 sm:text-3xl"
             >
               <FaChevronRight />
             </button>
 
-            {/* Counter */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/40 px-3 py-1 rounded-full text-xs sm:text-sm z-10">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/40 px-3 py-1 text-xs text-white sm:text-sm">
               {currentIndex + 1} / {images.length}
             </div>
           </div>
