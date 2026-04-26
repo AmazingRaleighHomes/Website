@@ -29,7 +29,12 @@ export default function HomePageClient() {
         onSearch={handleSearch}
       />
       <Suspense fallback={null}>
-        <MLS filters={mlsFilters} />
+        <MLS
+          filters={mlsFilters}
+          onSearch={handleSearch}
+          selectedArea={selectedArea}
+          setSelectedArea={setSelectedArea}
+        />
       </Suspense>
       <Journey />
       <Testimonials />

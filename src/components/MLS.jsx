@@ -14,7 +14,12 @@ import {
 import ListingModal from "./ListingModal";
 import { supabase } from "@/lib/supabase";
 
-export default function MLSProperties({ filters = {} }) {
+export default function MLSProperties({
+  filters = {},
+  onSearch,
+  selectedArea = "Raleigh-Durham",
+  setSelectedArea,
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -25,10 +30,23 @@ export default function MLSProperties({ filters = {} }) {
   const [error, setError] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [imageIndexes, setImageIndexes] = useState({});
+  const [refineQuery, setRefineQuery] = useState(filters.query || "");
+  const [refinePrice, setRefinePrice] = useState(filters.price || "Any Price");
+  const [refineArea, setRefineArea] = useState(selectedArea || "Raleigh-Durham");
 
   const perPage = 12;
   const propertyTypes = ["All", "Single Family", "Townhouse", "Condo", "Apartment"];
   const listingParam = searchParams.get("listing");
+  const areaOptions = [
+    "Raleigh-Durham",
+    "Raleigh",
+    "Durham",
+    "Cary",
+    "Apex",
+    "Wake Forest",
+    "Chapel Hill",
+  ];
+  const priceOptions = ["Any Price", "$100k", "$300k", "$500k", "$750k+"];
   const normalizeSearchText = (value) =>
     String(value || "")
       .toLowerCase()
@@ -80,6 +98,15 @@ export default function MLSProperties({ filters = {} }) {
     }
   }, [listingParam, properties]);
 
+  useEffect(() => {
+    setRefineQuery(filters.query || "");
+    setRefinePrice(filters.price || "Any Price");
+  }, [filters.query, filters.price]);
+
+  useEffect(() => {
+    setRefineArea(selectedArea || "Raleigh-Durham");
+  }, [selectedArea]);
+
   const updateListingQuery = (listingValue) => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -103,6 +130,29 @@ export default function MLSProperties({ filters = {} }) {
   const closePropertyModal = () => {
     setSelectedProperty(null);
     updateListingQuery(null);
+  };
+
+  const submitRefinedSearch = () => {
+    setSelectedArea?.(refineArea);
+    setCurrentPage(1);
+    onSearch?.({
+      query: refineQuery,
+      price: refinePrice,
+      area: refineArea,
+    });
+  };
+
+  const clearRefinedSearch = () => {
+    setRefineQuery("");
+    setRefinePrice("Any Price");
+    setRefineArea("Raleigh-Durham");
+    setSelectedArea?.("Raleigh-Durham");
+    setCurrentPage(1);
+    onSearch?.({
+      query: "",
+      price: "Any Price",
+      area: "Raleigh-Durham",
+    });
   };
 
   let filtered =
@@ -264,6 +314,66 @@ export default function MLSProperties({ filters = {} }) {
               {type}
             </button>
           ))}
+        </div>
+
+        <div className="sticky top-20 z-20 mb-8 rounded-[1.6rem] border border-[#e6ddd4] bg-[#fffaf5]/95 p-4 shadow-[0_18px_45px_rgba(48,36,24,0.08)] backdrop-blur-md">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+            <label className="flex-1 rounded-[1.2rem] border border-[#d8cec4] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73]">
+              Search
+              <input
+                type="text"
+                placeholder="City, neighborhood, address, or MLS #"
+                value={refineQuery}
+                onChange={(e) => setRefineQuery(e.target.value)}
+                className="mt-1.5 w-full bg-transparent text-[15px] normal-case tracking-normal text-[#1f1c17] outline-none placeholder:text-[#94897f]"
+              />
+            </label>
+
+            <label className="rounded-[1.2rem] border border-[#d8cec4] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73] lg:w-[190px]">
+              Area
+              <select
+                value={refineArea}
+                onChange={(e) => setRefineArea(e.target.value)}
+                className="mt-1.5 w-full bg-transparent text-[15px] normal-case tracking-normal text-[#1f1c17] outline-none"
+              >
+                {areaOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="rounded-[1.2rem] border border-[#d8cec4] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73] lg:w-[170px]">
+              Max Price
+              <select
+                value={refinePrice}
+                onChange={(e) => setRefinePrice(e.target.value)}
+                className="mt-1.5 w-full bg-transparent text-[15px] normal-case tracking-normal text-[#1f1c17] outline-none"
+              >
+                {priceOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="flex gap-3 lg:pb-[2px]">
+              <button
+                onClick={submitRefinedSearch}
+                className="flex-1 rounded-full bg-[#d86a45] px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#bf5532] lg:flex-none"
+              >
+                Update Search
+              </button>
+              <button
+                onClick={clearRefinedSearch}
+                className="flex-1 rounded-full border border-[#d8cec4] bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-[#1f1c17] transition hover:border-[#d86a45] hover:text-[#d86a45] lg:flex-none"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
         </div>
 
         {!loading && !error && (
