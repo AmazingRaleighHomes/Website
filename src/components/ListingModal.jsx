@@ -94,7 +94,7 @@ export default function ListingModal({ property, isOpen, onClose }) {
   const handleShare = async () => {
     const shareUrl =
       typeof window !== "undefined"
-        ? `${window.location.origin}${window.location.pathname}?listing=${property.ListingId || property.id || ""}`
+        ? `${window.location.origin}/listing/${property.ListingId || property.id || ""}`
         : "";
 
     const sharePayload = {
