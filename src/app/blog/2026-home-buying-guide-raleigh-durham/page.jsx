@@ -186,7 +186,7 @@ export default function RaleighDurhamHomebuyingBlog() {
 
   <p className="text-lg text-gray-700 leading-relaxed">
     These neighborhoods command premium pricing, but they also offer long-term appreciation and strong community amenities. 
-    If you want local neighborhood guides, see <Link href="/neighborhoods">our neighborhoods page</Link>.
+    If you want local neighborhood guides, start with <Link href="/raleigh-homes-for-sale">our Raleigh homes page</Link> and <Link href="/cary-homes-for-sale">our Cary homes page</Link>.
   </p>
 </section>
 
@@ -222,8 +222,8 @@ export default function RaleighDurhamHomebuyingBlog() {
   </ol>
 
   <p className="text-lg text-gray-700 leading-relaxed">
-    Ready to find homes that match your budget? Browse current listings on our <Link href="/listings">Listings page</Link>, 
-    or <Link href="/contact">contact an agent</Link> for a free affordability review.
+    Ready to find homes that match your budget? Browse current inventory on our <Link href="/?area=Raleigh-Durham#mls-listings">live listings search</Link>, 
+    or <Link href="/contact-us">contact an agent</Link> for a free affordability review.
   </p>
 </section>
 
