@@ -1,5 +1,10 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+export function getPrimaryImageUrl(property) {
+  const images = property?.images || property?.Media || [];
+  return images[0] || null;
+}
+
 export async function getPropertyByListingId(listingId) {
   if (!listingId) return null;
 
