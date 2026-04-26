@@ -1,158 +1,173 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function HeroSection({ selectedArea, onSearch }) {
-  const [propertyOpen, setPropertyOpen] = useState(false);
   const [propertyValue, setPropertyValue] = useState("Any Price");
   const [query, setQuery] = useState("");
-
-  const propertyRef = useRef(null);
-  const [propertyWidth, setPropertyWidth] = useState(0);
-
   const propertyOptions = ["Any Price", "$100k", "$300k", "$500k", "$750k+"];
 
-  // Measure property dropdown width
-  useEffect(() => {
-    if (propertyRef.current) setPropertyWidth(propertyRef.current.offsetWidth);
-  }, []);
-
-  // Smooth exponential scroll to MLS component
   const scrollToMLS = () => {
     const target = document.getElementById("mls-listings");
     if (!target) return;
-
-    const start = window.scrollY;
-    const end = target.offsetTop;
-    const distance = end - start;
-    const duration = 800; // in ms
-    let startTime = null;
-
-    const easeInOutExpo = (t) =>
-      t === 0
-        ? 0
-        : t === 1
-        ? 1
-        : t < 0.5
-        ? Math.pow(2, 20 * t - 10) / 2
-        : (2 - Math.pow(2, -20 * t + 10)) / 2;
-
-    const animate = (currentTime) => {
-      if (!startTime) startTime = currentTime;
-      const timeElapsed = currentTime - startTime;
-      const progress = Math.min(timeElapsed / duration, 1);
-      const eased = easeInOutExpo(progress);
-
-      window.scrollTo(0, start + distance * eased);
-
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleSearch = () => {
     if (onSearch) {
       onSearch({
         price: propertyValue,
-        query: query,
+        query,
         area: selectedArea,
       });
     }
-    scrollToMLS(); // scroll after applying filters
+    scrollToMLS();
   };
 
   return (
     <section
-      className="relative h-[90vh] sm:h-screen bg-cover bg-center overflow-hidden"
+      className="relative overflow-hidden bg-[#17130f] pt-24 text-white sm:pt-28"
       style={{
         backgroundImage:
           "url('https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg')",
+        backgroundPosition: "center",
+        backgroundSize: "cover",
       }}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/40" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(255,255,255,1)_9%,rgba(255,255,255,0.74)_17%,rgba(19,14,10,0.42)_42%,rgba(19,14,10,0.72)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(180deg,rgba(23,19,15,0)_0%,rgba(23,19,15,1)_100%)]" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6">
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-white text-4xl sm:text-5xl md:text-6xl font-bold mb-4 max-w-3xl leading-tight drop-shadow-lg"
-        >
-          Find Your Dream Home in Raleigh-Durham
-        </motion.h1>
+      <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-7xl items-center justify-center px-4 pb-16 pt-10 sm:px-6 lg:px-8">
+        <div className="max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, ease: "easeOut" }}
+            className="mb-5 inline-flex items-center rounded-full border border-white/40 bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#4f463f] backdrop-blur-sm"
+          >
+            Raleigh • Durham • Cary • Apex • Wake Forest
+          </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
-          className="text-gray-200 text-base sm:text-lg md:text-xl mb-8 max-w-2xl"
-        >
-          Discover the latest MLS listings, explore neighborhoods, and connect
-          with trusted local real estate experts.
-        </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.85, ease: "easeOut" }}
+            className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.03em] text-white sm:text-6xl lg:text-7xl"
+          >
+            Search Raleigh-Durham homes for sale with Ulrich Realty.
+          </motion.h1>
 
-<motion.div
-  initial={{ opacity: 0, y: 40 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-  className="bg-white/90 backdrop-blur-xl rounded-full w-full max-w-4xl mx-auto flex items-center flex-nowrap text-gray-700 font-medium px-4 py-2 relative"
->
-  {/* Divided Group */}
-  <div className="flex flex-grow items-center divide-x divide-gray-300 min-w-0">
-    {/* Property Value Dropdown */}
-<div
-  ref={propertyRef}
-  className="relative flex items-center gap-1 px-3 cursor-pointer flex-shrink-0 hidden sm:flex"
-  onClick={() => setPropertyOpen(!propertyOpen)}
->
-  <span>{propertyValue}</span>
-  <svg
-    className="w-4 h-4 text-gray-500"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 9l-7 7-7-7"
-    />
-  </svg>
-      {/* Dropdown options ... */}
-    </div>
+          <motion.p
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
+            className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/86 sm:text-lg"
+          >
+            Explore homes for sale in Raleigh, Durham, Cary, Apex, and nearby
+            Triangle communities with local guidance on neighborhoods, pricing,
+            commute patterns, and buyer strategy.
+          </motion.p>
 
-    {/* Selected Area (hidden on mobile) */}
-    <div className="px-3 text-gray-700 flex-shrink-0 hidden sm:block">
-      {selectedArea || "Area"}
-    </div>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+            className="mt-8 rounded-[1.75rem] border border-[#ead7cb]/70 bg-[#fffaf5]/96 p-3 text-left shadow-[0_18px_55px_rgba(0,0,0,0.22)] backdrop-blur-sm sm:p-4"
+          >
+            <div className="grid gap-2 lg:grid-cols-[minmax(0,1.75fr)_0.8fr_0.8fr_auto]">
+              <label className="flex flex-col rounded-[1.25rem] border border-[var(--border)] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73]">
+                Search
+                <input
+                  type="text"
+                  placeholder="Location, neighborhood, address, or MLS #"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="mt-1.5 bg-transparent text-[15px] normal-case tracking-normal text-[var(--foreground)] outline-none placeholder:text-[#94897f]"
+                />
+              </label>
 
-    {/* Location / MLS Input */}
-    <input
-      type="text"
-      placeholder="City, Address, or MLS #"
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      className="flex-grow bg-transparent px-3 py-1 focus:outline-none placeholder-gray-500 min-w-0"
-    />
-  </div>
+              <label className="flex flex-col rounded-[1.25rem] border border-[var(--border)] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73]">
+                Area
+                <div className="mt-1.5 text-[15px] font-medium normal-case tracking-normal text-[var(--foreground)]">
+                  {selectedArea || "Raleigh-Durham"}
+                </div>
+              </label>
 
-  {/* Search Button (stays on same line) */}
-  <button
-    onClick={handleSearch}
-    className="ml-3 bg-[#ebcc65] hover:bg-[#e5555c] text-white border border-black px-6 py-2 rounded-full font-medium transition flex-shrink-0"
-  >
-    Search
-  </button>
-</motion.div>
+              <label className="flex flex-col rounded-[1.25rem] border border-[var(--border)] bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-[#887d73]">
+                Max price
+                <select
+                  value={propertyValue}
+                  onChange={(e) => setPropertyValue(e.target.value)}
+                  className="mt-1.5 bg-transparent text-[15px] font-medium normal-case tracking-normal text-[var(--foreground)] outline-none"
+                >
+                  {propertyOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
+              <button
+                onClick={handleSearch}
+                className="flex min-h-full items-center justify-center rounded-[1.25rem] bg-[#d86a45] px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#bf5532]"
+              >
+                Search Listings
+              </button>
+            </div>
 
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-1 text-sm text-[var(--muted)]">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#9b5a40]">
+                Popular
+              </span>
+              <button
+                onClick={() => setQuery("North Hills")}
+                className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
+              >
+                North Hills
+              </button>
+              <button
+                onClick={() => setQuery("Cary")}
+                className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
+              >
+                Cary
+              </button>
+              <button
+                onClick={() => setQuery("Durham")}
+                className="rounded-full bg-[#f6ebe4] px-3 py-1.5 transition hover:bg-[#eed8cc] hover:text-[var(--foreground)]"
+              >
+                Durham
+              </button>
+            </div>
+          </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            className="mx-auto mt-7 max-w-2xl rounded-[1.6rem] border border-white/18 bg-black/20 px-5 py-5 text-center backdrop-blur-sm"
+          >
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#f1c4b0]">
+              What&apos;s Your Home Worth?
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-white sm:text-[2rem]">
+              See what your Raleigh-Durham home could command in today&apos;s market.
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/72">
+              Get a local home value estimate backed by neighborhood activity,
+              recent comparable sales, and current buyer demand across the Triangle.
+            </p>
+            <div className="mt-5">
+              <a
+                href="/contact-us"
+                className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#4f463f] transition hover:bg-[#eed8cc]"
+              >
+                Get My Home Value
+              </a>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

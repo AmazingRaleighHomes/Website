@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-// Mock Blog Data
 const allPosts = [
   {
     id: 1,
@@ -12,7 +11,7 @@ const allPosts = [
     slug: "2026-home-buying-guide-raleigh-durham",
     category: "Buying",
     excerpt:
-      "Discover the top strategies to secure your perfect home in today's market...",
+      "Learn how first-time buyers can compete for Raleigh and Durham homes with smarter financing, neighborhood research, and offer strategy...",
     image:
       "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
     date: "Oct 12, 2025",
@@ -23,7 +22,7 @@ const allPosts = [
     slug: "renovation-ideas-that-add-value",
     category: "Renovation",
     excerpt:
-      "Increase your property value with these creative and practical renovation tips...",
+      "See which upgrades tend to matter most to Triangle buyers when you want to improve livability and resale value...",
     image:
       "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
     date: "Sep 28, 2025",
@@ -34,7 +33,7 @@ const allPosts = [
     slug: "understanding-real-estate-investment",
     category: "Investing",
     excerpt:
-      "A beginner's guide to making smart real estate investments that pay off...",
+      "Understand what local investors watch in Raleigh-Durham, from rent demand and location fundamentals to long-term appreciation...",
     image:
       "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
     date: "Sep 10, 2025",
@@ -45,7 +44,7 @@ const allPosts = [
     slug: "decorating-tips-for-small-spaces",
     category: "Interior",
     excerpt:
-      "Maximize your small living spaces with these stylish and functional tips...",
+      "Use simple design choices to make condos, townhomes, and smaller homes feel brighter, larger, and more marketable...",
     image:
       "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
     date: "Aug 22, 2025",
@@ -56,7 +55,7 @@ const allPosts = [
     slug: "top-neighborhoods-to-buy-in-2025",
     category: "Buying",
     excerpt:
-      "Explore the most promising neighborhoods for real estate investment and living...",
+      "Compare some of the most searched Raleigh-area neighborhoods for lifestyle, inventory mix, and long-term upside...",
     image:
       "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
     date: "Jul 15, 2025",
@@ -67,7 +66,7 @@ const allPosts = [
     slug: "eco-friendly-home-renovations",
     category: "Renovation",
     excerpt:
-      "Sustainable renovations that reduce your footprint and increase your home’s value...",
+      "Explore sustainable upgrades that can improve comfort, reduce operating costs, and strengthen resale appeal in North Carolina...",
     image:
       "https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg",
     date: "Jun 30, 2025",
@@ -92,9 +91,8 @@ export default function BlogSection() {
   };
 
   return (
-    <section className="py-24 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 text-center">
-        {/* Heading */}
+    <section className="bg-[#f3ece4] py-24">
+      <div className="mx-auto max-w-7xl px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -102,22 +100,24 @@ export default function BlogSection() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-12"
         >
-          <h2 className="text-4xl sm:text-5xl font-regular text-gray-800 leading-snug">
-            Our Latest <br />
+          <p className="text-sm uppercase tracking-[0.28em] text-[#a15b41]">
+            Market Insight
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold leading-snug text-[#1f1c17] sm:text-5xl">
+            Raleigh-Durham real estate advice <br />
             <span
-              className="font-serif italic text-[#ebcc65]"
+              className="font-serif italic text-[#d86a45]"
               style={{ fontWeight: "200" }}
             >
-              Blog Posts
+              and Triangle market updates
             </span>
           </h2>
-          <p className="mt-4 text-gray-600 max-w-xl mx-auto">
-            Stay up-to-date with tips, insights, and market trends from our team of experts.
+          <p className="mx-auto mt-4 max-w-xl text-[#6f675f]">
+            Stay current on Raleigh, Durham, Cary, and Chapel Hill housing trends with practical advice for buyers, sellers, and investors.
           </p>
         </motion.div>
 
-        {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <div className="mb-12 flex flex-wrap justify-center gap-3">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -125,10 +125,10 @@ export default function BlogSection() {
                 setActiveCategory(cat);
                 setVisibleCount(3);
               }}
-              className={`px-5 py-2 rounded-full font-medium transition ${
+              className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition ${
                 activeCategory === cat
-                  ? "bg-[#ebcc65] text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                  ? "border-[#d86a45] bg-[#1f1b17] text-white"
+                  : "border-[#d8cec4] bg-white text-[#5f5750] hover:bg-[#fbf5ef]"
               }`}
             >
               {cat}
@@ -136,29 +136,30 @@ export default function BlogSection() {
           ))}
         </div>
 
-        {/* Blog Grid */}
         <motion.div layout className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {displayedPosts.map((post) => (
             <motion.div
               key={post.id}
               layout
               whileHover={{ scale: 1.03 }}
-              className="bg-white rounded-2xl shadow-md overflow-hidden"
+              className="overflow-hidden rounded-[2rem] border border-[#e6ddd4] bg-white shadow-[0_20px_60px_rgba(48,36,24,0.08)]"
             >
               <img
                 src={post.image}
                 alt={post.title}
-                className="w-full h-56 object-cover"
+                className="h-56 w-full object-cover"
               />
               <div className="p-6 text-left">
-                <p className="text-sm text-gray-400 mb-2">{post.date}</p>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <p className="mb-2 text-sm uppercase tracking-[0.18em] text-[#a15b41]">
+                  {post.date}
+                </p>
+                <h3 className="mb-2 text-lg font-semibold text-[#1f1c17]">
                   {post.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                <p className="mb-4 text-[#6f675f]">{post.excerpt}</p>
 
                 <Link href={`/blog/${post.slug}`} passHref>
-                  <button className="mt-2 text-[#ebcc65] font-semibold hover:underline">
+                  <button className="mt-2 font-semibold text-[#d86a45] hover:underline">
                     Read More
                   </button>
                 </Link>
@@ -167,12 +168,11 @@ export default function BlogSection() {
           ))}
         </motion.div>
 
-        {/* Load More Button */}
         {visibleCount < filteredPosts.length && (
           <div className="mt-12 text-center">
             <button
               onClick={handleLoadMore}
-              className="bg-[#ebcc65] hover:bg-[#d7595d] text-white px-6 py-2 rounded-full font-medium transition"
+              className="rounded-full bg-[#d86a45] px-6 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-[#bf5532]"
             >
               Load More Posts
             </button>

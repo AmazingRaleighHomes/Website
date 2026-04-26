@@ -1,81 +1,91 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function JourneySection() {
+  const communities = [
+    "Raleigh",
+    "Durham",
+    "Cary",
+    "Apex",
+    "Wake Forest",
+    "Holly Springs",
+    "Morrisville",
+    "Chapel Hill",
+    "Fuquay-Varina",
+    "Garner",
+    "Clayton",
+    "Rolesville",
+  ];
+
   return (
-    <section className="py-20 bg-gray-50">
-      <div className="max-w-7xl px-6 mx-auto text-center">
-        {/* Heading */}
+    <section className="bg-[#1f1b17] py-20 text-white">
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-8"
+          className="relative min-h-[320px] overflow-hidden rounded-[2rem]"
         >
-         <h2 className="text-4xl sm:text-5xl font-regular text-gray-800 leading-snug">
-  Your Journey To The Perfect <br /> Home{" "}
-  <span
-    className="font-serif italic text-[#ebcc65]"
-    style={{ fontWeight: "200" }}
-  >
-    Starts With Us
-  </span>
-</h2>
-
+          <img
+            src="https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg"
+            alt="Raleigh-Durham neighborhood homes"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(19,15,12,0.15)_0%,rgba(19,15,12,0.75)_100%)]" />
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="max-w-xs rounded-[1.6rem] border border-white/15 bg-black/30 p-5 backdrop-blur-sm">
+              <p className="text-xs uppercase tracking-[0.3em] text-[#f1c4b0]">
+                Local Guidance
+              </p>
+              <p className="mt-3 text-sm leading-6 text-white/78">
+                From in-town Raleigh homes to growing suburbs like Cary, Apex,
+                and Wake Forest, we help buyers compare lifestyle, inventory,
+                and value with real local context.
+              </p>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Subtext */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
-          className="text-gray-600 max-w-2xl mx-auto mb-16 text-lg"
+          className="rounded-[2rem] border border-white/10 bg-[#26211d] p-8 sm:p-10"
         >
-          With a proven track record and in-depth market knowledge, we're here to make your
-          real estate journey smooth and stress-free. Whether buying, selling, or investing,
-          you can count on our team to deliver results with integrity.
-        </motion.p>
+          <p className="text-sm uppercase tracking-[0.28em] text-[#f1c4b0]">
+            Explore Communities
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold leading-tight text-white sm:text-5xl">
+            Explore Raleigh-Durham neighborhoods before you book a showing.
+          </h2>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/72">
+            Triangle real estate is hyper-local. Search the communities buyers
+            ask about most, compare neighborhood feel and location advantages,
+            and narrow your search around commute, schools, amenities, and price.
+          </p>
 
-{/* Image Section */}
-<div className="relative w-full flex justify-center">
-  <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg">
-    <img
-      src="https://degbfm0bobp7.cloudfront.net/storage/56df3875-1b80-480e-953d-763faa4fc182/delivery/f8a6ed51-b4ac-4177-d762-08dde1a82257/images/web/016_B56S.jpg"
-      alt="Luxury Home"
-      className="w-full h-full object-cover"
-    />
-
-    {/* Stats Overlay */}
-    <div className="absolute bottom-6 w-full flex flex-col sm:flex-row justify-center gap-6 sm:gap-8 px-4">
-      {/* Box 1 */}
-      <div className="bg-white bg-opacity-95 rounded-2xl shadow-md p-6 flex-1">
-        <h3 className="text-3xl font-bold text-[#ebcc65] mb-1">1,500</h3>
-        <p className="text-gray-700 text-sm">
-          Total Properties Sold. Helping Families Find Their Dream Homes For Over A Decade.
-        </p>
-      </div>
-
-      {/* Box 2 */}
-      <div className="bg-white bg-opacity-95 rounded-2xl shadow-md p-6 flex-1">
-        <h3 className="text-3xl font-bold text-[#ebcc65] mb-1">30+</h3>
-        <p className="text-gray-700 text-sm">
-          Strong Partnerships With Local Businesses To Enhance Our Services.
-        </p>
-      </div>
-
-      {/* Box 3 */}
-      <div className="bg-white bg-opacity-95 rounded-2xl shadow-md p-6 flex-1">
-        <h3 className="text-3xl font-bold text-[#ebcc65] mb-1">98%</h3>
-        <p className="text-gray-700 text-sm">
-          Client Satisfaction Rate, Reflecting Our Commitment To Exceptional Service.
-        </p>
-      </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {communities.map((community) => (
+              <Link
+                key={community}
+                href="#mls-listings"
+                className="rounded-[1.2rem] border border-white/10 bg-white/5 px-4 py-4 text-left text-sm font-medium text-white/86 transition hover:border-[#d86a45]/50 hover:bg-white/10"
+              >
+                {community}
+              </Link>
+            ))}
           </div>
-            </div>
-        </div>
+
+          <div className="mt-8 flex flex-wrap gap-4 text-sm text-white/62">
+            <span>Neighborhood expertise</span>
+            <span>School and commute context</span>
+            <span>Buyer and seller strategy</span>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

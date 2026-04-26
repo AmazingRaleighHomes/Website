@@ -40,21 +40,18 @@ export default function TestimonialsSection() {
   const prevTestimonial = () =>
     setIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
 
-  // Auto-slide
   useEffect(() => {
     timeoutRef.current = setTimeout(nextTestimonial, 7000);
     return () => clearTimeout(timeoutRef.current);
   }, [index]);
 
-  // Pause on hover
   const handleMouseEnter = () => clearTimeout(timeoutRef.current);
   const handleMouseLeave = () =>
     (timeoutRef.current = setTimeout(nextTestimonial, 7000));
 
   return (
-    <section className="py-24 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-6 text-center">
-        {/* Heading */}
+    <section className="bg-[#fffaf5] py-24">
+      <div className="mx-auto max-w-4xl px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -62,32 +59,32 @@ export default function TestimonialsSection() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-12"
         >
-          <h2 className="text-4xl sm:text-5xl font-regular text-gray-800 leading-snug">
-            Hear From Our Awesome <br />
+          <p className="text-sm uppercase tracking-[0.28em] text-[#a15b41]">
+            Client Reviews
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold leading-snug text-[#1f1c17] sm:text-5xl">
+            Hear from buyers and sellers <br />
             <span
-              className="font-serif italic text-[#ebcc65]"
+              className="font-serif italic text-[#d86a45]"
               style={{ fontWeight: "200" }}
             >
-              Satisfied Clients
+              across the Triangle
             </span>
           </h2>
         </motion.div>
 
-        {/* Carousel */}
         <div
           className="relative flex items-center justify-center"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          {/* Prev Button */}
           <button
             onClick={prevTestimonial}
-            className="absolute left-0 sm:-left-12 p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition"
+            className="absolute left-0 rounded-full border border-[#d8cec4] bg-white p-2 transition hover:bg-[#f8efe8] sm:-left-12"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-600" />
+            <ChevronLeft className="h-6 w-6 text-[#6f675f]" />
           </button>
 
-          {/* Testimonial */}
           <AnimatePresence mode="wait">
             <motion.div
               key={index}
@@ -95,7 +92,7 @@ export default function TestimonialsSection() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="max-w-2xl text-center"
+              className="max-w-2xl rounded-[2rem] border border-[#eadfd6] bg-white px-8 py-10 text-center shadow-[0_18px_60px_rgba(48,36,24,0.08)]"
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
@@ -105,59 +102,53 @@ export default function TestimonialsSection() {
               }}
             >
               <div className="relative">
-                {/* Quotation Marks */}
-                <div className="absolute -top-6 left-0 text-7xl text-[#ebcc65] opacity-30 select-none">
+                <div className="absolute -top-6 left-0 select-none text-7xl text-[#d86a45] opacity-20">
                   “
                 </div>
 
-                {/* Quote */}
-                <p className="text-gray-700 text-lg sm:text-xl leading-relaxed mb-6">
+                <p className="mb-6 text-lg leading-relaxed text-[#4f463f] sm:text-xl">
                   “{testimonials[index].quote}”
                 </p>
 
-                {/* Rating Stars */}
-                <div className="flex justify-center mb-4">
+                <div className="mb-4 flex justify-center">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
+                      className={`h-5 w-5 ${
                         i < testimonials[index].rating
-                          ? "text-[#ebcc65]"
+                          ? "text-[#d86a45]"
                           : "text-gray-300"
                       }`}
                     />
                   ))}
                 </div>
 
-                {/* Client Info */}
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-800">
+                  <h4 className="text-lg font-semibold text-[#1f1c17]">
                     {testimonials[index].name}
                   </h4>
-                  <p className="text-gray-500">{testimonials[index].location}</p>
-                  <p className="text-gray-400 text-sm mt-1">{testimonials[index].date}</p>
+                  <p className="text-[#6f675f]">{testimonials[index].location}</p>
+                  <p className="mt-1 text-sm text-[#8c8177]">{testimonials[index].date}</p>
                 </div>
               </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* Next Button */}
           <button
             onClick={nextTestimonial}
-            className="absolute right-0 sm:-right-12 p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition"
+            className="absolute right-0 rounded-full border border-[#d8cec4] bg-white p-2 transition hover:bg-[#f8efe8] sm:-right-12"
           >
-            <ChevronRight className="w-6 h-6 text-gray-600" />
+            <ChevronRight className="h-6 w-6 text-[#6f675f]" />
           </button>
         </div>
 
-        {/* Dots Indicator */}
-        <div className="flex justify-center mt-8 gap-3">
+        <div className="mt-8 flex justify-center gap-3">
           {testimonials.map((_, i) => (
             <button
               key={i}
               onClick={() => setIndex(i)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                i === index ? "bg-[#ebcc65]" : "bg-gray-300"
+              className={`h-3 w-3 rounded-full transition-all ${
+                i === index ? "bg-[#d86a45]" : "bg-[#d7cbc1]"
               }`}
             ></button>
           ))}

@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaChevronLeft, FaChevronRight, FaBed, FaBath, FaRulerCombined, FaLeaf } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaBed,
+  FaBath,
+  FaRulerCombined,
+  FaLeaf,
+} from "react-icons/fa";
 import ListingModal from "./ListingModal";
-import { supabase } from "@/lib/supabase"; 
-
+import { supabase } from "@/lib/supabase";
 
 export default function MLSProperties({ filters = {} }) {
   const [properties, setProperties] = useState([]);
@@ -23,23 +29,26 @@ export default function MLSProperties({ filters = {} }) {
     async function fetchMLS() {
       setLoading(true);
       try {
-        const { data, error } = await supabase
+        const { data, error: fetchError } = await supabase
           .from("properties")
           .select("*")
           .order("dateAdded", { ascending: false });
 
-        if (error) setError(error.message);
-        else setProperties(data || []);
+        if (fetchError) {
+          setError(fetchError.message);
+        } else {
+          setProperties(data || []);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     }
+
     fetchMLS();
   }, []);
 
-  // Filter & sorting
   let filtered =
     selectedType === "All"
       ? properties
@@ -48,11 +57,16 @@ export default function MLSProperties({ filters = {} }) {
   if (filters.price && filters.price !== "Any Price") {
     const priceMax = (() => {
       switch (filters.price) {
-        case "$100k": return 100_000;
-        case "$300k": return 300_000;
-        case "$500k": return 500_000;
-        case "$750k+": return Infinity;
-        default: return Infinity;
+        case "$100k":
+          return 100_000;
+        case "$300k":
+          return 300_000;
+        case "$500k":
+          return 500_000;
+        case "$750k+":
+          return Infinity;
+        default:
+          return Infinity;
       }
     })();
     filtered = filtered.filter((p) => p.price <= priceMax);
@@ -67,14 +81,21 @@ export default function MLSProperties({ filters = {} }) {
     );
   }
 
-  const displayedProperties = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
+  const displayedProperties = filtered.slice(
+    (currentPage - 1) * perPage,
+    currentPage * perPage
+  );
   const maxPage = Math.ceil(filtered.length / perPage);
 
   const getImageIndex = (id) => imageIndexes[id] || 0;
+
   const changeImage = (id, direction, total) => {
     setImageIndexes((prev) => {
       const current = prev[id] || 0;
-      const next = direction === "next" ? (current + 1) % total : (current - 1 + total) % total;
+      const next =
+        direction === "next"
+          ? (current + 1) % total
+          : (current - 1 + total) % total;
       return { ...prev, [id]: next };
     });
   };
@@ -84,42 +105,50 @@ export default function MLSProperties({ filters = {} }) {
     const date = new Date(dateString);
     const now = new Date();
     const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+
     if (diffHours < 1) return "Added just now";
-    if (diffHours < 24) return `Added ${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffHours < 24) {
+      return `Added ${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    }
+
     const diffDays = Math.floor(diffHours / 24);
     return `Added ${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
 
   return (
-    <section id="mls-listings" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section id="mls-listings" className="bg-[#f6f1e8] py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-10"
+          className="mb-10 text-center"
         >
-          <h1 className="text-4xl sm:text-5xl font-regular text-gray-800 leading-snug">
-            Discover Handpicked Homes
-            <br />
-            That{" "}
-            <span className="font-serif italic" style={{ color: "#ebcc65", fontWeight: "200" }}>
-              Define Elegance
-            </span>
+          <p className="text-sm uppercase tracking-[0.28em] text-[#a15b41]">
+            Search Raleigh Listings
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.03em] text-[#1f1c17] sm:text-5xl">
+            Browse current inventory by property style and lifestyle fit.
           </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#6f675f]">
+            Inspired by the reference site&apos;s category-first browsing, but
+            tied directly into your live property feed and modal experience.
+          </p>
         </motion.div>
 
-        {/* Type Filters */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <div className="mb-12 flex flex-wrap justify-center gap-3">
           {propertyTypes.map((type) => (
             <button
               key={type}
-              onClick={() => { setSelectedType(type); setCurrentPage(1); }}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all border ${
+              onClick={() => {
+                setSelectedType(type);
+                setCurrentPage(1);
+              }}
+              className={`rounded-full border px-6 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-all ${
                 selectedType === type
-                  ? "bg-[#ebcc65] text-white border-gray-500"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                  ? "border-[#d86a45] bg-[#1f1b17] text-white"
+                  : "border-[#d8cec4] bg-[#fffaf5] text-[#5f5750] hover:border-[#1f1b17] hover:bg-white"
               }`}
             >
               {type}
@@ -127,12 +156,11 @@ export default function MLSProperties({ filters = {} }) {
           ))}
         </div>
 
-        {loading && <p className="text-gray-500">Finding your forever home...</p>}
-        {error && <p className="text-red-500">Oh no! I dropped the ball: {error}</p>}
+        {loading && <p className="text-center text-[#6f675f]">Finding your forever home...</p>}
+        {error && <p className="text-center text-red-500">Oh no! I dropped the ball: {error}</p>}
 
-        {/* Properties Grid */}
-        {!loading && !error && (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        {!loading && !error && filtered.length > 0 && (
+          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
             {displayedProperties.map((property) => {
               const id = property.id;
               const media = property.images || [];
@@ -145,23 +173,22 @@ export default function MLSProperties({ filters = {} }) {
                 <motion.div
                   key={id}
                   whileHover={{ scale: 1.03 }}
-                  className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 relative"
+                  className="relative cursor-pointer overflow-hidden rounded-[2rem] border border-[#e6ddd4] bg-[#fffaf5] shadow-[0_20px_60px_rgba(48,36,24,0.08)] transition-all duration-300"
                   onClick={() => setSelectedProperty(property)}
                 >
-                  {/* Image Container */}
-                  <div className="relative w-full h-56 bg-gray-200 rounded-t-2xl overflow-hidden">
+                  <div className="relative h-56 w-full overflow-hidden rounded-t-[2rem] bg-gray-200">
                     <img
                       src={currentImage}
                       alt={property.address || "Property image"}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
+
                     {addedText && (
-                      <div className="absolute top-3 right-2 z-35 bg-[#ebcc65] text-white text-xs font-medium px-3 py-1 rounded-2xl shadow-lg pointer-events-none">
-                        New — {addedText}
+                      <div className="pointer-events-none absolute left-4 top-4 z-35 rounded-full bg-[#1f1b17] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-lg">
+                        {addedText}
                       </div>
                     )}
 
-                    {/* Carousel Arrows */}
                     {totalImages > 1 && (
                       <>
                         <button
@@ -169,7 +196,7 @@ export default function MLSProperties({ filters = {} }) {
                             e.stopPropagation();
                             changeImage(id, "prev", totalImages);
                           }}
-                          className="absolute top-1/2 left-2 -translate-y-1/2 z-35 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition pointer-events-auto"
+                          className="pointer-events-auto absolute left-3 top-1/2 z-35 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/70"
                           aria-label="Previous image"
                         >
                           <FaChevronLeft size={16} />
@@ -179,7 +206,7 @@ export default function MLSProperties({ filters = {} }) {
                             e.stopPropagation();
                             changeImage(id, "next", totalImages);
                           }}
-                          className="absolute top-1/2 right-2 -translate-y-1/2 z-35 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition pointer-events-auto"
+                          className="pointer-events-auto absolute right-3 top-1/2 z-35 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/70"
                           aria-label="Next image"
                         >
                           <FaChevronRight size={16} />
@@ -188,41 +215,44 @@ export default function MLSProperties({ filters = {} }) {
                     )}
                   </div>
 
-                  {/* Card Details */}
-                  <div className="p-4 text-left">
-                    <p className="text-lg font-semibold text-[#ebcc65]">
-                      ${property.price ? property.price.toLocaleString() : "N/A"}
-                    </p>
-                    <p className="text-gray-700 text-sm">{property.type || "Home"}</p>
+                  <div className="p-5 text-left">
+                    <div className="mb-2 flex items-start justify-between gap-4">
+                      <p className="text-xl font-semibold text-[#d86a45]">
+                        ${property.price ? property.price.toLocaleString() : "N/A"}
+                      </p>
+                      <span className="rounded-full bg-[#f3e2d8] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9b5a40]">
+                        {property.type || "Home"}
+                      </span>
+                    </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-gray-500 text-xs mt-1">
+                    <p className="text-base font-medium leading-6 text-[#1f1c17]">
+                      {property.address || "Address unavailable"}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#6f675f]">
                       {property.beds && (
-                        <div className="flex items-center gap-1">
-                          <FaBed size={14} /> {property.beds}
+                        <div className="flex items-center gap-1.5">
+                          <FaBed size={14} /> {property.beds} beds
                         </div>
                       )}
                       {property.baths > 0 && (
-                        <div className="flex items-center gap-1">
-                          <FaBath size={14} /> {property.baths}
+                        <div className="flex items-center gap-1.5">
+                          <FaBath size={14} /> {property.baths} baths
                         </div>
                       )}
                       {property.sqft && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           <FaRulerCombined size={14} /> {property.sqft.toLocaleString()} sqft
                         </div>
                       )}
                       {property.acres && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           <FaLeaf size={14} /> {property.acres} acres
                         </div>
                       )}
                     </div>
 
-                    <p className="text-gray-500 text-xs mt-1">
-                      {property.address || "Address unavailable"}
-                    </p>
-
-                    <button className="mt-3 w-full bg-[#ebcc65] hover:bg-[#d7595d] text-white py-2 rounded-full text-sm font-medium transition border border-white shadow-inner hover:shadow-lg">
+                    <button className="mt-5 w-full rounded-full border border-[#e2b39f]/40 bg-[#d86a45] py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-[#bf5532]">
                       View Details
                     </button>
                   </div>
@@ -232,15 +262,21 @@ export default function MLSProperties({ filters = {} }) {
           </div>
         )}
 
-        {/* Pagination */}
         {!loading && !error && filtered.length > perPage && (
           <div className="mt-12 text-center">
             <button
               onClick={() => setCurrentPage(currentPage < maxPage ? currentPage + 1 : 1)}
-              className="bg-[#ebcc65] hover:bg-[#d7595d] text-white px-6 py-2 rounded-full font-medium transition"
+              className="rounded-full border border-[#1f1b17] bg-[#1f1b17] px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-[#312923]"
             >
               Load More Listings
             </button>
+          </div>
+        )}
+
+        {!loading && !error && filtered.length === 0 && (
+          <div className="rounded-[2rem] border border-dashed border-[#d8cec4] bg-[#fffaf5] px-6 py-12 text-center text-[#6f675f]">
+            No listings matched that combination yet. Try a broader location or
+            a higher max price to see more homes.
           </div>
         )}
 
