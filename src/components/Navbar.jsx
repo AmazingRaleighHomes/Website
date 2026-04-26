@@ -10,7 +10,7 @@ export default function Navbar() {
 
   const links = [
     { name: "Home", href: "/" },
-    { name: "Listings", href: "#mls-listings" },
+    { name: "Listings", href: "/#mls-listings" },
     { name: "Agents", href: "/our-agents" },
     { name: "Contact", href: "/contact-us" },
   ];

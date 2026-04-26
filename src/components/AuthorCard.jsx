@@ -27,19 +27,25 @@ export default function AuthorCard() {
       {/* Snippet / Expandable Bio */}
       <div className="text-gray-700 text-sm leading-relaxed">
         <p>
-          Mike Ulrich is a top Realtor® and founder of Amazing Raleigh Durham Homes, dedicated to helping buyers and sellers in Raleigh–Durham navigate one of the fastest-moving housing markets in North Carolina. He is known for his innovative approach, deep local knowledge, and client-first philosophy.
+          Mike Ulrich is the founder of Ulrich Realty, dedicated to helping buyers and sellers in Raleigh-Durham navigate one of North Carolina&apos;s most competitive housing markets with clear local guidance and a client-first approach.
         </p>
 
         {expanded && (
           <div className="mt-2 space-y-2">
             <p>
-              Under Mike’s leadership, Ulrich Realty has built a boutique, high-performing team focused on delivering exceptional results. Mike emphasizes mentorship, accountability, and the right systems to empower agents while providing clients with unmatched guidance and insight.
+              Under Mike&apos;s leadership, Ulrich Realty has built a boutique,
+              high-performing real estate brand focused on thoughtful guidance,
+              local expertise, and a smoother buying and selling experience from
+              first conversation to closing day.
             </p>
             <p>
-              Beyond real estate, Mike actively gives back to the community, supporting local initiatives, schools, and small businesses. He also leverages technology to make the home buying and selling process seamless, from virtual tours to market analysis.
+              Mike combines relationship-driven service with modern tools that
+              help clients evaluate neighborhoods, compare opportunities, and
+              move through the process with more clarity and confidence.
             </p>
             <p>
-              Mike’s mission is to create lasting value for clients and the community, ensuring each transaction goes beyond the sale to leave a meaningful impact.
+              His goal is simple: help clients make smart real estate decisions
+              and feel well supported at every stage of the move.
             </p>
           </div>
         )}

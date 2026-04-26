@@ -55,7 +55,9 @@ export default function Footer() {
           <h4 className="mb-2 font-semibold text-white">Quick Links</h4>
           <ul className="flex flex-col gap-2 text-sm text-gray-400">
             <li><Link href="/" className="transition hover:text-[#f1c4b0]">Home</Link></li>
-            <li><Link href="#mls-listings" className="transition hover:text-[#f1c4b0]">Listings</Link></li>
+            <li><Link href="/#mls-listings" className="transition hover:text-[#f1c4b0]">Listings</Link></li>
+            <li><Link href="/raleigh-homes-for-sale" className="transition hover:text-[#f1c4b0]">Raleigh Homes</Link></li>
+            <li><Link href="/cary-homes-for-sale" className="transition hover:text-[#f1c4b0]">Cary Homes</Link></li>
             <li><Link href="/our-agents" className="transition hover:text-[#f1c4b0]">Agents</Link></li>
             <li><Link href="/contact-us" className="transition hover:text-[#f1c4b0]">Contact</Link></li>
           </ul>

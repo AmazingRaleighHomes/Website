@@ -286,14 +286,14 @@ export default function MLSProperties({
           className="mb-10 text-center"
         >
           <p className="text-sm uppercase tracking-[0.28em] text-[#a15b41]">
-            Search Raleigh Listings
+            Search Triangle Listings
           </p>
           <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.03em] text-[#1f1c17] sm:text-5xl">
             Browse current inventory by property style and lifestyle fit.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#6f675f]">
-            Inspired by the reference site&apos;s category-first browsing, but
-            tied directly into your live property feed and modal experience.
+            Explore homes across Raleigh-Durham by property type, price range,
+            neighborhood, and the details that matter most to your move.
           </p>
         </motion.div>
 
@@ -382,8 +382,8 @@ export default function MLSProperties({
           </div>
         )}
 
-        {loading && <p className="text-center text-[#6f675f]">Finding your forever home...</p>}
-        {error && <p className="text-center text-red-500">Oh no! I dropped the ball: {error}</p>}
+        {loading && <p className="text-center text-[#6f675f]">Finding your next home...</p>}
+        {error && <p className="text-center text-red-500">We&apos;re having trouble loading listings right now. Please try again in a moment.</p>}
 
         {!loading && !error && filtered.length > 0 && (
           <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function HeroSection({ selectedArea, setSelectedArea, onSearch }) {
@@ -22,6 +22,14 @@ export default function HeroSection({ selectedArea, setSelectedArea, onSearch })
     { label: "Luxury Homes", query: "Luxury", area: "Raleigh-Durham" },
     { label: "New Listings", query: "", area: "Raleigh-Durham", price: "Any Price" },
   ];
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    setQuery(params.get("query") || "");
+    setPropertyValue(params.get("price") || "Any Price");
+  }, []);
 
   const scrollToMLS = () => {
     const target = document.getElementById("mls-listings");

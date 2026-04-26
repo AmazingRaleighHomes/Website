@@ -5,18 +5,18 @@ import Link from "next/link";
 
 export default function JourneySection() {
   const communities = [
-    "Raleigh",
-    "Durham",
-    "Cary",
-    "Apex",
-    "Wake Forest",
-    "Holly Springs",
-    "Morrisville",
-    "Chapel Hill",
-    "Fuquay-Varina",
-    "Garner",
-    "Clayton",
-    "Rolesville",
+    { label: "Raleigh", href: "/raleigh-homes-for-sale" },
+    { label: "Durham", href: "/durham-homes-for-sale" },
+    { label: "Cary", href: "/cary-homes-for-sale" },
+    { label: "Apex", href: "/apex-homes-for-sale" },
+    { label: "Wake Forest", href: "/wake-forest-homes-for-sale" },
+    { label: "Holly Springs", href: "/?query=Holly%20Springs#mls-listings" },
+    { label: "Morrisville", href: "/?query=Morrisville#mls-listings" },
+    { label: "Chapel Hill", href: "/?area=Chapel%20Hill#mls-listings" },
+    { label: "Fuquay-Varina", href: "/?query=Fuquay-Varina#mls-listings" },
+    { label: "Garner", href: "/?query=Garner#mls-listings" },
+    { label: "Clayton", href: "/?query=Clayton#mls-listings" },
+    { label: "Rolesville", href: "/?query=Rolesville#mls-listings" },
   ];
 
   return (
@@ -71,11 +71,11 @@ export default function JourneySection() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {communities.map((community) => (
               <Link
-                key={community}
-                href="#mls-listings"
+                key={community.label}
+                href={community.href}
                 className="rounded-[1.2rem] border border-white/10 bg-white/5 px-4 py-4 text-left text-sm font-medium text-white/86 transition hover:border-[#d86a45]/50 hover:bg-white/10"
               >
-                {community}
+                {community.label}
               </Link>
             ))}
           </div>
