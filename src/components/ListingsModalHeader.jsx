@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { FaShareAlt } from "react-icons/fa";
 
-export default function ListingsModalHeader({ onBack, onShare, logoSrc }) {
+export default function ListingsModalHeader({
+  onBack,
+  logoSrc,
+}) {
   return (
     <div className="sticky top-0 z-[70] border-b border-[#e6ddd4] bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6">
       <div className="mx-auto flex w-full max-w-[1240px] items-center justify-between gap-4">
@@ -39,14 +41,7 @@ export default function ListingsModalHeader({ onBack, onShare, logoSrc }) {
             Ulrich Realty
           </div>
         )}
-
-        <button
-          onClick={onShare}
-          className="inline-flex items-center gap-2 rounded-full border border-[#d8cec4] bg-white px-4 py-2 text-sm font-medium text-[#1f1c17] transition hover:border-[#d86a45] hover:text-[#d86a45]"
-        >
-          <FaShareAlt />
-          Share
-        </button>
+        <div className="w-[88px]" aria-hidden="true" />
       </div>
     </div>
   );

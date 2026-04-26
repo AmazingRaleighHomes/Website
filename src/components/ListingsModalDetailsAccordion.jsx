@@ -1,5 +1,7 @@
 "use client";
 
+import { FaShareAlt } from "react-icons/fa";
+
 const showValue = (value) => {
   if (value === null || value === undefined) return false;
   if (Array.isArray(value) && value.length === 0) return false;
@@ -26,7 +28,7 @@ function DetailCard({ title, children }) {
   );
 }
 
-export default function ListingsModalDetailsAccordion({ data }) {
+export default function ListingsModalDetailsAccordion({ data, onShare, shareStatus }) {
   if (!data) {
     return <p className="text-red-600">No listing data provided.</p>;
   }
@@ -70,6 +72,13 @@ export default function ListingsModalDetailsAccordion({ data }) {
           >
             Request A Tour
           </a>
+          <button
+            onClick={onShare}
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#d8cec4] bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#1f1c17] transition hover:border-[#d86a45] hover:text-[#d86a45]"
+          >
+            <FaShareAlt />
+            {shareStatus || "Share Listing"}
+          </button>
           <a
             href="https://m.me/mike.ulrich81"
             target="_blank"

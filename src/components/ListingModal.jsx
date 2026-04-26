@@ -86,15 +86,48 @@ function ListingsModalMap({ lat, lng, property, isOpen }) {
 
 export default function ListingModal({ property, isOpen, onClose }) {
   const [isClient, setIsClient] = useState(false);
+  const [shareStatus, setShareStatus] = useState("");
   useEffect(() => setIsClient(true), []);
 
   if (!property || !isOpen || !isClient) return null;
+
+  const handleShare = async () => {
+    const shareUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}${window.location.pathname}?listing=${property.ListingId || property.id || ""}`
+        : "";
+
+    const sharePayload = {
+      title: property.ListingName || property.address || "Ulrich Realty Listing",
+      text: property.address
+        ? `Take a look at this property: ${property.address}`
+        : "Take a look at this Ulrich Realty listing.",
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(sharePayload);
+        setShareStatus("Shared");
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareStatus("Link copied");
+      } else {
+        setShareStatus("Share unavailable");
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        setShareStatus("Share unavailable");
+      }
+    } finally {
+      window.setTimeout(() => setShareStatus(""), 2200);
+    }
+  };
 
   return (
     <>
       <ListingsModalHeader
         onBack={onClose}
-        onShare={() => alert("Share this listing!")}
         logoSrc="/favicon/favicon.svg"
       />
 
@@ -147,7 +180,11 @@ export default function ListingModal({ property, isOpen, onClose }) {
                 </div>
 
                 <div className="w-full flex-shrink-0 lg:w-[340px]">
-                  <ListingsModalDetailsAccordion data={property} />
+                  <ListingsModalDetailsAccordion
+                    data={property}
+                    onShare={handleShare}
+                    shareStatus={shareStatus}
+                  />
                 </div>
               </div>
             </div>
