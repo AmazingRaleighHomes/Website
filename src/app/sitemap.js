@@ -1,4 +1,5 @@
 import { getAllListingIds } from "@/lib/listings";
+import { areaPages } from "@/lib/areaPages";
 
 const BASE_URL = "https://www.amazingraleighdurhamhomes.com";
 
@@ -28,6 +29,12 @@ export default async function sitemap() {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    ...areaPages.map((page) => ({
+      url: `${BASE_URL}/${page.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    })),
   ];
 
   try {
