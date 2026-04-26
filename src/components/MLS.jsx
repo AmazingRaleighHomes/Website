@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -14,6 +15,9 @@ import ListingModal from "./ListingModal";
 import { supabase } from "@/lib/supabase";
 
 export default function MLSProperties({ filters = {} }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [properties, setProperties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedType, setSelectedType] = useState("All");
@@ -24,6 +28,7 @@ export default function MLSProperties({ filters = {} }) {
 
   const perPage = 12;
   const propertyTypes = ["All", "Single Family", "Townhouse", "Condo", "Apartment"];
+  const listingParam = searchParams.get("listing");
 
   useEffect(() => {
     async function fetchMLS() {
@@ -48,6 +53,51 @@ export default function MLSProperties({ filters = {} }) {
 
     fetchMLS();
   }, []);
+
+  useEffect(() => {
+    if (!listingParam || properties.length === 0) return;
+
+    const matchedProperty = properties.find((property) => {
+      const possibleIds = [
+        property.ListingId,
+        property.listingId,
+        property.id,
+      ]
+        .filter(Boolean)
+        .map((value) => String(value));
+
+      return possibleIds.includes(String(listingParam));
+    });
+
+    if (matchedProperty) {
+      setSelectedProperty(matchedProperty);
+    }
+  }, [listingParam, properties]);
+
+  const updateListingQuery = (listingValue) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (listingValue) {
+      params.set("listing", String(listingValue));
+    } else {
+      params.delete("listing");
+    }
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  };
+
+  const openPropertyModal = (property) => {
+    setSelectedProperty(property);
+    updateListingQuery(property.ListingId || property.listingId || property.id);
+  };
+
+  const closePropertyModal = () => {
+    setSelectedProperty(null);
+    updateListingQuery(null);
+  };
 
   let filtered =
     selectedType === "All"
@@ -174,7 +224,7 @@ export default function MLSProperties({ filters = {} }) {
                   key={id}
                   whileHover={{ scale: 1.03 }}
                   className="relative cursor-pointer overflow-hidden rounded-[2rem] border border-[#e6ddd4] bg-[#fffaf5] shadow-[0_20px_60px_rgba(48,36,24,0.08)] transition-all duration-300"
-                  onClick={() => setSelectedProperty(property)}
+                  onClick={() => openPropertyModal(property)}
                 >
                   <div className="relative h-56 w-full overflow-hidden rounded-t-[2rem] bg-gray-200">
                     <img
@@ -283,7 +333,7 @@ export default function MLSProperties({ filters = {} }) {
         <ListingModal
           property={selectedProperty}
           isOpen={!!selectedProperty}
-          onClose={() => setSelectedProperty(null)}
+          onClose={closePropertyModal}
         />
       </div>
     </section>

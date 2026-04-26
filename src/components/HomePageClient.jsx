@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import HeroSection from "@/components/HeroSection";
 import Navbar from "@/components/Navbar";
 import MLS from "@/components/MLS";
@@ -20,7 +20,9 @@ export default function HomePageClient() {
     <main>
       <Navbar />
       <HeroSection selectedArea="Raleigh-Durham" onSearch={handleSearch} />
-      <MLS filters={mlsFilters} />
+      <Suspense fallback={null}>
+        <MLS filters={mlsFilters} />
+      </Suspense>
       <Journey />
       <Testimonials />
       <Blog />
